@@ -18,6 +18,7 @@ public class PurchaseParser {
         try {
             json = new JSONObject(value);
         } catch (JSONException e) {
+            ReactiveBillingLogger.log(e, "Cannot parse purchase json");
             return null;
         }
 

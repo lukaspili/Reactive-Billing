@@ -18,13 +18,14 @@ import android.content.Context;
 
 import com.github.lukaspili.reactivebilling.model.PurchaseType;
 import com.github.lukaspili.reactivebilling.observable.BillingServiceObservable;
+import com.github.lukaspili.reactivebilling.observable.ConsumePurchaseObservable;
 import com.github.lukaspili.reactivebilling.observable.GetPurchasesObservable;
 import com.github.lukaspili.reactivebilling.observable.GetSkuDetailsObservable;
 import com.github.lukaspili.reactivebilling.observable.IsBillingSupportedObservable;
 import com.github.lukaspili.reactivebilling.response.DidBuy;
 import com.github.lukaspili.reactivebilling.response.GetPurchases;
 import com.github.lukaspili.reactivebilling.response.GetSkuDetails;
-import com.github.lukaspili.reactivebilling.response.IsBillingSupported;
+import com.github.lukaspili.reactivebilling.response.Response;
 
 import rx.Observable;
 
@@ -51,8 +52,12 @@ public class ReactiveBilling {
         return BillingServiceObservable.create(context);
     }
 
-    public Observable<IsBillingSupported> isBillingSupported(PurchaseType purchaseType) {
+    public Observable<Response> isBillingSupported(PurchaseType purchaseType) {
         return IsBillingSupportedObservable.create(context, purchaseType);
+    }
+
+    public Observable<Response> consumePurchase(String purchaseToken) {
+        return ConsumePurchaseObservable.create(context, purchaseToken);
     }
 
     public Observable<GetSkuDetails> getSkuDetails(PurchaseType purchaseType, String... productIds) {
@@ -70,7 +75,6 @@ public class ReactiveBilling {
     public void buy(String productId, PurchaseType purchaseType, String developerPayload) {
         purchaseFlowService.requestFlow(productId, purchaseType, developerPayload);
     }
-
 
 
     PurchaseFlowService getPurchaseFlowService() {

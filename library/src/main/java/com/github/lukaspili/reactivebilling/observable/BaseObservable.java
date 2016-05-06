@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.os.Looper;
 
 import com.android.vending.billing.IInAppBillingService;
 import com.github.lukaspili.reactivebilling.BillingService;
@@ -27,7 +28,8 @@ public abstract class BaseObservable<T> implements Observable.OnSubscribe<T> {
 
     @Override
     public void call(Subscriber<? super T> subscriber) {
-        ReactiveBillingLogger.log("Base observable call");
+        ReactiveBillingLogger.log("Base observable call on thread = " + Thread.currentThread().getName());
+        ReactiveBillingLogger.log("Current thread looper = " + Looper.myLooper());
 
         final Connection connection = new Connection(subscriber);
 
@@ -44,7 +46,7 @@ public abstract class BaseObservable<T> implements Observable.OnSubscribe<T> {
         subscriber.add(Subscriptions.create(new Action0() {
             @Override
             public void call() {
-                ReactiveBillingLogger.log("Base observable unsubscribe and unbind");
+                ReactiveBillingLogger.log("Base observable unsubscribe and unbind on thread: " + Thread.currentThread().getName());
                 context.unbindService(connection);
             }
         }));
@@ -64,7 +66,7 @@ public abstract class BaseObservable<T> implements Observable.OnSubscribe<T> {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            ReactiveBillingLogger.log("Service connection connected");
+            ReactiveBillingLogger.log("Service connection connected on thread = " + Thread.currentThread().getName());
 
             IInAppBillingService billingService = IInAppBillingService.Stub.asInterface(service);
             BillingService reactiveBillingService = new BillingService(context, billingService);
@@ -73,8 +75,7 @@ public abstract class BaseObservable<T> implements Observable.OnSubscribe<T> {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            ReactiveBillingLogger.log("Service connection disconnected");
-
+            ReactiveBillingLogger.log("Service connection disconnected on thread = " + Thread.currentThread().getName());
         }
     }
 }

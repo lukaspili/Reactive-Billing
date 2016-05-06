@@ -3,7 +3,7 @@ package com.github.lukaspili.reactivebilling.response;
 /**
  * Created by lukasz on 06/05/16.
  */
-public abstract class Response {
+public class Response {
 
     protected final int responseCode;
 

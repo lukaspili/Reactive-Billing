@@ -21,6 +21,7 @@ import com.github.lukaspili.reactivebilling.model.SkuDetails;
 import com.github.lukaspili.reactivebilling.response.DidBuy;
 import com.github.lukaspili.reactivebilling.response.GetSkuDetails;
 import com.github.lukaspili.reactivebilling.sample.R;
+import com.github.lukaspili.reactivebilling.sample.Utils;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -154,36 +155,7 @@ public class ShopFragment extends Fragment {
             reason = "Congrats on buying a " + didBuy.getPurchase().getProductId();
         } else {
             title = "Cannot buy the item";
-            switch (didBuy.getResponseCode()) {
-                case 1:
-                    reason = "BILLING_RESPONSE_RESULT_USER_CANCELED";
-                    break;
-                case 2:
-                    reason = "BILLING_RESPONSE_RESULT_SERVICE_UNAVAILABLE";
-                    break;
-                case 3:
-                    reason = "BILLING_RESPONSE_RESULT_BILLING_UNAVAILABLE";
-                    break;
-                case 4:
-                    reason = "BILLING_RESPONSE_RESULT_ITEM_UNAVAILABLE";
-                    break;
-                case 5:
-                    reason = "BILLING_RESPONSE_RESULT_DEVELOPER_ERROR";
-                    break;
-                case 6:
-                    reason = "BILLING_RESPONSE_RESULT_ERROR";
-                    break;
-                case 7:
-                    reason = "BILLING_RESPONSE_RESULT_ITEM_ALREADY_OWNED";
-                    break;
-                case 8:
-                    reason = "BILLING_RESPONSE_RESULT_ITEM_NOT_OWNED";
-                    break;
-                default:
-                    throw new IllegalStateException("Unknown response code");
-            }
-
-            reason = "Reason = " + reason;
+            reason = Utils.getMessage(didBuy.getResponseCode());
         }
 
         new AlertDialog.Builder(getContext())

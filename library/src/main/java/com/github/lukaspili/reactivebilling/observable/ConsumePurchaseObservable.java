@@ -4,29 +4,28 @@ import android.content.Context;
 import android.os.RemoteException;
 
 import com.github.lukaspili.reactivebilling.BillingService;
-import com.github.lukaspili.reactivebilling.model.PurchaseType;
 import com.github.lukaspili.reactivebilling.response.Response;
 
 import rx.Observable;
 import rx.Observer;
 
-public class IsBillingSupportedObservable extends BaseObservable<Response> {
+public class ConsumePurchaseObservable extends BaseObservable<Response> {
 
-    public static Observable<Response> create(Context context, PurchaseType purchaseType) {
-        return Observable.create(new IsBillingSupportedObservable(context, purchaseType));
+    public static Observable<Response> create(Context context, String purchaseToken) {
+        return Observable.create(new ConsumePurchaseObservable(context, purchaseToken));
     }
 
-    private final PurchaseType purchaseType;
+    private final String purchaseToken;
 
-    private IsBillingSupportedObservable(Context context, PurchaseType purchaseType) {
+    private ConsumePurchaseObservable(Context context, String purchaseToken) {
         super(context);
-        this.purchaseType = purchaseType;
+        this.purchaseToken = purchaseToken;
     }
 
     @Override
     protected void onBillingServiceReady(BillingService billingService, Observer<? super Response> observer) {
         try {
-            observer.onNext(billingService.isBillingSupported(purchaseType));
+            observer.onNext(billingService.consumePurchase(purchaseToken));
             observer.onCompleted();
         } catch (RemoteException e) {
             observer.onError(e);

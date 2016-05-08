@@ -2,6 +2,8 @@
 <manifest package="com.github.lukaspili.reactivebilling.sample"
           xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".App"
         android:allowBackup="true"

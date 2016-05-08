@@ -103,7 +103,7 @@ public class InventoryFragment extends Fragment implements TabsAdapter.Tab {
 
     private void load() {
         Log.d(getClass().getName(), "Load inventory");
-        
+
         ReactiveBilling.getInstance(getContext())
                 .getPurchases(PurchaseType.PRODUCT, null)
                 .subscribeOn(Schedulers.io())

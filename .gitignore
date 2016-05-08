@@ -68,3 +68,5 @@ app/src/main/res/values/com_crashlytics_export_strings.xml
 
 keystore.jks
 
+sample/fabric.properties
+

@@ -28,7 +28,9 @@ The Reactive Billing API is accessible through the singleton instance.
 ReactiveBilling.getInstance(context)
 ```
 
-The methods are exposed
+The methods on `ReactiveBilling` are matching the methods of the AIDL service `IInAppBillingService`.
+With the difference that they return `Observable` objects, also taking care of connecting to the AIDL service.
+
 
 ### Is Billing Supported
 

@@ -7,8 +7,8 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import com.github.lukaspili.reactivebilling.sample.inventory.InventoryFragment;
 import com.github.lukaspili.reactivebilling.sample.shop.ShopFragment;
 
-public class AppPagerAdapter extends FragmentStatePagerAdapter {
-    public AppPagerAdapter(FragmentManager fm) {
+public class TabsAdapter extends FragmentStatePagerAdapter {
+    public TabsAdapter(FragmentManager fm) {
         super(fm);
     }
 

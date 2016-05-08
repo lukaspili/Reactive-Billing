@@ -1,5 +1,6 @@
 package com.github.lukaspili.reactivebilling.sample.shop;
 
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -37,6 +38,8 @@ public class ShopFragment extends Fragment {
     private ShopAdapter adapter = new ShopAdapter();
     private Subscription subscription;
 
+    private Dialog dialog;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -45,20 +48,13 @@ public class ShopFragment extends Fragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.fragment_toolbar_menu, menu);
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_refresh:
-                load();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+    public void onDestroy() {
+        if (dialog != null) {
+            dialog.dismiss();
+            dialog = null;
         }
+
+        super.onDestroy();
     }
 
     @Override
@@ -158,7 +154,7 @@ public class ShopFragment extends Fragment {
             reason = Utils.getMessage(didBuy.getResponseCode());
         }
 
-        new AlertDialog.Builder(getContext())
+        dialog = new AlertDialog.Builder(getContext())
                 .setTitle(title)
                 .setMessage(reason)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {

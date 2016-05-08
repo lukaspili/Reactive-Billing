@@ -1,5 +1,6 @@
 package com.github.lukaspili.reactivebilling.sample.inventory;
 
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -39,28 +40,13 @@ public class InventoryFragment extends Fragment {
     private RecyclerView recyclerView;
     private InventoryAdapter adapter = new InventoryAdapter();
 
+    private Dialog dialog;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         recyclerView = (RecyclerView) inflater.inflate(R.layout.fragment_shop, container, false);
         return recyclerView;
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.fragment_toolbar_menu, menu);
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_refresh:
-                load();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
     }
 
     @Override
@@ -72,7 +58,7 @@ public class InventoryFragment extends Fragment {
         adapter.bind(new InventoryAdapter.DidClickItem() {
             @Override
             public void onClick(final Purchase purchase) {
-                new AlertDialog.Builder(getContext())
+                dialog = new AlertDialog.Builder(getContext())
                         .setTitle("Consume item")
                         .setMessage(String.format("Do you want to consume the %s?", purchase.getProductId()))
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
@@ -96,6 +82,16 @@ public class InventoryFragment extends Fragment {
         recyclerView.setAdapter(adapter);
 
         load();
+    }
+
+    @Override
+    public void onDestroy() {
+        if (dialog != null) {
+            dialog.dismiss();
+            dialog = null;
+        }
+
+        super.onDestroy();
     }
 
     private void load() {
@@ -166,6 +162,7 @@ public class InventoryFragment extends Fragment {
     }
 
     private void didSucceedConsumePurchase(Response response) {
+        // reload the list once the product is consumed
         load();
 
         String title;
@@ -178,7 +175,7 @@ public class InventoryFragment extends Fragment {
             message = Utils.getMessage(response.getResponseCode());
         }
 
-        new AlertDialog.Builder(getContext())
+        dialog = new AlertDialog.Builder(getContext())
                 .setTitle(title)
                 .setMessage(message)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {

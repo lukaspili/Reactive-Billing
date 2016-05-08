@@ -33,7 +33,7 @@ public class PurchaseFlowService {
                 throw new IllegalStateException("Already has subscription");
             }
 
-            ReactiveBillingLogger.log("Purchase flow - subscribe");
+            ReactiveBillingLogger.log("Purchase flow - subscribe (thread %s)", Thread.currentThread().getName());
             hasSubscription = true;
         }
     }).doOnUnsubscribe(new Action0() {
@@ -43,14 +43,14 @@ public class PurchaseFlowService {
                 throw new IllegalStateException("Doesn't have any subscription");
             }
 
-            ReactiveBillingLogger.log("Purchase flow - unsubscribe");
+            ReactiveBillingLogger.log("Purchase flow - unsubscribe (thread %s)", Thread.currentThread().getName());
             hasSubscription = false;
         }
     });
 
     private boolean hasSubscription;
 
-    public PurchaseFlowService(Context context) {
+    PurchaseFlowService(Context context) {
         this.context = context;
     }
 
@@ -69,7 +69,7 @@ public class PurchaseFlowService {
                 .subscribe(new Action1<GetBuyIntent>() {
                     @Override
                     public void call(GetBuyIntent getBuyIntent) {
-                        ReactiveBillingLogger.log("Request flow - on next");
+                        ReactiveBillingLogger.log("Request flow - on next (thread %s)", Thread.currentThread().getName());
 
                         // not sure the subject can be null
                         // possible cause: request buy intent, then configuration changes happens before buy intent comes back
@@ -87,7 +87,7 @@ public class PurchaseFlowService {
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        ReactiveBillingLogger.log("Request flow - on error");
+                        ReactiveBillingLogger.log("Request flow - on error (thread %s)", Thread.currentThread().getName());
 
                         // not sure the subject can be null
                         // possible cause: request buy intent, then configuration changes happens before buy intent comes back
@@ -118,12 +118,12 @@ public class PurchaseFlowService {
         }
 
         if (resultCode == Activity.RESULT_OK) {
-            ReactiveBillingLogger.log("Did buy result - OK");
+            ReactiveBillingLogger.log("Purchase flow result - OK (thread %s)", Thread.currentThread().getName());
 
             int response = data.getIntExtra("RESPONSE_CODE", -1);
-            ReactiveBillingLogger.log("Did buy result - response: %d", response);
+            ReactiveBillingLogger.log("Purchase flow result - response: %d (thread %s)", response, Thread.currentThread().getName());
 
-            if (response != 0) {
+            if (response == 0) {
                 Purchase purchase = PurchaseParser.parse(data.getStringExtra("INAPP_PURCHASE_DATA"));
                 String signature = data.getStringExtra("INAPP_DATA_SIGNATURE");
                 subject.call(new DidBuy(response, purchase, signature, null));
@@ -131,7 +131,7 @@ public class PurchaseFlowService {
                 subject.call(new DidBuy(response, null, null, null));
             }
         } else {
-            ReactiveBillingLogger.log("Did buy result - CANCELED");
+            ReactiveBillingLogger.log("Purchase flow result - CANCELED (thread %s)", Thread.currentThread().getName());
             subject.call(new DidBuy(-1, null, null, null));
         }
     }

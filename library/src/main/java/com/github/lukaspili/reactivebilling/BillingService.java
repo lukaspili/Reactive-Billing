@@ -3,7 +3,6 @@ package com.github.lukaspili.reactivebilling;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
@@ -26,6 +25,8 @@ import java.util.List;
  */
 public class BillingService {
 
+    private static final int API_VERSION = 3;
+
     private final Context context;
     private final IInAppBillingService billingService;
 
@@ -35,25 +36,24 @@ public class BillingService {
     }
 
     public Response isBillingSupported(PurchaseType purchaseType) throws RemoteException {
-        ReactiveBillingLogger.log("Is billing supported on thread = %s", Thread.currentThread().getName());
+        ReactiveBillingLogger.log("Is billing supported - request (thread %s)", Thread.currentThread().getName());
 
-        int response = billingService.isBillingSupported(Constants.GOOGLE_API_VERSION, context.getPackageName(), purchaseType.getIdentifier());
+        int response = billingService.isBillingSupported(BillingService.API_VERSION, context.getPackageName(), purchaseType.getIdentifier());
         ReactiveBillingLogger.log("Is billing supported - response: %d", response);
         return new Response(response);
     }
 
     public Response consumePurchase(String purchaseToken) throws RemoteException {
-        ReactiveBillingLogger.log("Consume purchase on thread = %s", Thread.currentThread().getName());
+        ReactiveBillingLogger.log("Consume purchase - request (thread %s)", Thread.currentThread().getName());
 
-        int response = billingService.consumePurchase(Constants.GOOGLE_API_VERSION, context.getPackageName(), purchaseToken);
+        int response = billingService.consumePurchase(BillingService.API_VERSION, context.getPackageName(), purchaseToken);
         ReactiveBillingLogger.log("Consume purchase - response: %d", response);
         return new Response(response);
     }
 
     public GetPurchases getPurchases(PurchaseType purchaseType, String continuationToken) throws RemoteException {
-        ReactiveBillingLogger.log("Get purchases on thread = %s", Thread.currentThread().getName());
-        ReactiveBillingLogger.log("Get purchases - request");
-        Bundle bundle = billingService.getPurchases(Constants.GOOGLE_API_VERSION, context.getPackageName(), purchaseType.getIdentifier(), continuationToken);
+        ReactiveBillingLogger.log("Get purchases - request (thread %s)", Thread.currentThread().getName());
+        Bundle bundle = billingService.getPurchases(BillingService.API_VERSION, context.getPackageName(), purchaseType.getIdentifier(), continuationToken);
 
         int response = bundle.getInt("RESPONSE_CODE", -1);
         ReactiveBillingLogger.log("Get purchases - response code: %s", response);
@@ -84,13 +84,12 @@ public class BillingService {
             throw new IllegalArgumentException("Product ids cannot be blank");
         }
 
-        ReactiveBillingLogger.log("Get sku details on thread = %s", Thread.currentThread().getName());
-        ReactiveBillingLogger.log("Get sku details - request: %s", TextUtils.join(", ", productIds));
+        ReactiveBillingLogger.log("Get sku details - request: %s (thread %s)", TextUtils.join(", ", productIds), Thread.currentThread().getName());
 
         Bundle bundle = new Bundle();
         bundle.putStringArrayList("ITEM_ID_LIST", new ArrayList(Arrays.asList(productIds)));
 
-        bundle = billingService.getSkuDetails(Constants.GOOGLE_API_VERSION, context.getPackageName(), purchaseType.getIdentifier(), bundle);
+        bundle = billingService.getSkuDetails(BillingService.API_VERSION, context.getPackageName(), purchaseType.getIdentifier(), bundle);
 
         int response = bundle.getInt("RESPONSE_CODE", -1);
         ReactiveBillingLogger.log("Get sku details - response code: %s", response);
@@ -120,10 +119,9 @@ public class BillingService {
     }
 
     public GetBuyIntent getBuyIntent(String productId, PurchaseType purchaseType, String developerPayload) throws RemoteException {
-        ReactiveBillingLogger.log("Get buy intent on thread = %s", Thread.currentThread().getName());
-        ReactiveBillingLogger.log("Get buy intent - request: %s", productId);
+        ReactiveBillingLogger.log("Get buy intent - request: %s (thread %s)", productId, Thread.currentThread().getName());
 
-        Bundle bundle = billingService.getBuyIntent(Constants.GOOGLE_API_VERSION, context.getPackageName(), productId, purchaseType.getIdentifier(), developerPayload);
+        Bundle bundle = billingService.getBuyIntent(BillingService.API_VERSION, context.getPackageName(), productId, purchaseType.getIdentifier(), developerPayload);
 
         int response = bundle.getInt("RESPONSE_CODE", -1);
         ReactiveBillingLogger.log("Get buy intent - response code: %s", response);

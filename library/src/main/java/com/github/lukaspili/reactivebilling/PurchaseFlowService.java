@@ -81,7 +81,7 @@ public class PurchaseFlowService {
                         if (getBuyIntent.isSuccess()) {
                             startFlow(getBuyIntent.getIntent());
                         } else {
-                            subject.call(new DidBuy(getBuyIntent.getResponseCode(), null, null, null));
+                            subject.call(DidBuy.invalid(getBuyIntent.getResponseCode()));
                         }
                     }
                 }, new Action1<Throwable>() {
@@ -126,13 +126,13 @@ public class PurchaseFlowService {
             if (response == 0) {
                 Purchase purchase = PurchaseParser.parse(data.getStringExtra("INAPP_PURCHASE_DATA"));
                 String signature = data.getStringExtra("INAPP_DATA_SIGNATURE");
-                subject.call(new DidBuy(response, purchase, signature, null));
+                subject.call(DidBuy.valid(response, purchase, signature));
             } else {
-                subject.call(new DidBuy(response, null, null, null));
+                subject.call(DidBuy.invalid(response));
             }
         } else {
             ReactiveBillingLogger.log("Purchase flow result - CANCELED (thread %s)", Thread.currentThread().getName());
-            subject.call(new DidBuy(-1, null, null, null));
+            subject.call(DidBuy.invalid(DidBuy.LOCAL_ERROR_RESPONSE_CODE));
         }
     }
 }

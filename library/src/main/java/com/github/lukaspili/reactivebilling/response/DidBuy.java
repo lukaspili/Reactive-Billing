@@ -7,15 +7,25 @@ import com.github.lukaspili.reactivebilling.model.Purchase;
  */
 public class DidBuy extends Response {
 
+    public static final int LOCAL_ERROR_RESPONSE_CODE = -1;
+
     public static DidBuy error(Throwable throwable) {
-        return new DidBuy(-1, null, null, throwable);
+        return new DidBuy(LOCAL_ERROR_RESPONSE_CODE, null, null, throwable);
+    }
+
+    public static DidBuy invalid(int responseCode) {
+        return new DidBuy(responseCode, null, null, null);
+    }
+
+    public static DidBuy valid(int responseCode, Purchase purchase, String signature) {
+        return new DidBuy(responseCode, purchase, signature, null);
     }
 
     private final Purchase purchase;
     private final String signature;
     private final Throwable throwable;
 
-    public DidBuy(int responseCode, Purchase purchase, String signature, Throwable throwable) {
+    DidBuy(int responseCode, Purchase purchase, String signature, Throwable throwable) {
         super(responseCode);
         this.purchase = purchase;
         this.signature = signature;

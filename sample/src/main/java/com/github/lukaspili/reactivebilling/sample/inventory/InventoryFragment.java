@@ -5,14 +5,12 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -22,6 +20,7 @@ import com.github.lukaspili.reactivebilling.model.PurchaseType;
 import com.github.lukaspili.reactivebilling.response.GetPurchases;
 import com.github.lukaspili.reactivebilling.response.Response;
 import com.github.lukaspili.reactivebilling.sample.R;
+import com.github.lukaspili.reactivebilling.sample.TabsAdapter;
 import com.github.lukaspili.reactivebilling.sample.Utils;
 
 import java.util.List;
@@ -35,8 +34,9 @@ import rx.schedulers.Schedulers;
 /**
  * Created by lukasz on 06/05/16.
  */
-public class InventoryFragment extends Fragment {
+public class InventoryFragment extends Fragment implements TabsAdapter.Tab {
 
+    private SwipeRefreshLayout refreshLayout;
     private RecyclerView recyclerView;
     private InventoryAdapter adapter = new InventoryAdapter();
 
@@ -45,15 +45,22 @@ public class InventoryFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        recyclerView = (RecyclerView) inflater.inflate(R.layout.fragment_shop, container, false);
-        return recyclerView;
+        refreshLayout = (SwipeRefreshLayout) inflater.inflate(R.layout.fragment, container, false);
+        recyclerView = (RecyclerView) refreshLayout.findViewById(R.id.recyclerview);
+
+        return refreshLayout;
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        setHasOptionsMenu(true);
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                load();
+            }
+        });
 
         adapter.bind(new InventoryAdapter.DidClickItem() {
             @Override
@@ -96,7 +103,7 @@ public class InventoryFragment extends Fragment {
 
     private void load() {
         Log.d(getClass().getName(), "Load inventory");
-
+        
         ReactiveBilling.getInstance(getContext())
                 .getPurchases(PurchaseType.PRODUCT, null)
                 .subscribeOn(Schedulers.io())
@@ -104,11 +111,15 @@ public class InventoryFragment extends Fragment {
                 .subscribe(new Action1<GetPurchases>() {
                     @Override
                     public void call(GetPurchases getPurchases) {
+                        if (getActivity() == null) return;
+                        refreshLayout.setRefreshing(false);
                         didSucceedGetPurchases(getPurchases);
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
+                        if (getActivity() == null) return;
+                        refreshLayout.setRefreshing(false);
                         didFailGetPurchases();
                     }
                 });
@@ -189,5 +200,11 @@ public class InventoryFragment extends Fragment {
 
     private void didFailConsumePurchase() {
 
+    }
+
+    @Override
+    public void didFocus() {
+        Log.d(getClass().getName(), "Inventory did focus");
+        load();
     }
 }

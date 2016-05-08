@@ -195,7 +195,8 @@ ReactiveBilling.getInstance(getContext())
 
 ## Sample app
 
-You can find the Reactive Billing sample app on the play store.
+You can find the Reactive Billing sample app on the play store:
+
 [https://play.google.com/store/apps/details?id=com.github.lukaspili.reactivebilling.sample](https://play.google.com/store/apps/details?id=com.github.lukaspili.reactivebilling.sample)
 
 

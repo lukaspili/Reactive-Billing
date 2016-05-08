@@ -23,3 +23,5 @@ dependencies {
     provided 'io.reactivex:rxandroid:1.2.0'
     compile 'com.jakewharton.rxrelay:rxrelay:1.1.0'
 }
+
+apply from: 'https://raw.github.com/chrisbanes/gradle-mvn-push/master/gradle-mvn-push.gradle'

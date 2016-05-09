@@ -44,7 +44,7 @@ You can check the responses code in the documentation: [In App Billing reference
 
 The subscriber will always receive `onNext` if the request to the billing service was executed successfully. It doesn't mean though that the operation was successful. You need to check the response code.
 
-You can find all the responses code and their meaning in the [official documentation.](http://developer.android.com/google/play/billing/billing_reference.html#billing-codes)
+You can find all the responses code and their meaning in the documentation [In App Billing reference](http://developer.android.com/google/play/billing/billing_reference.html#billing-codes)
 
 The subscriber can also receive `onError` if an exception is thrown during the connection to the AIDL billing service (`RemoteException`). Reactive Billing is not doing any logic to catch the exception and the latter will be propagated to the subscriber.
 

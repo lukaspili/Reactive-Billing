@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.os.Looper;
 
 import com.android.vending.billing.IInAppBillingService;
 import com.github.lukaspili.reactivebilling.BillingService;
@@ -35,7 +36,9 @@ public abstract class BaseObservable<T> implements Observable.OnSubscribe<T> {
         final Intent intent = new Intent("com.android.vending.billing.InAppBillingService.BIND");
         intent.setPackage("com.android.vending");
 
-        final Connection connection = new Connection();
+        // don't bother with semaphores in the originating thread is the main thread
+        final boolean useSemaphore = Looper.myLooper() != Looper.getMainLooper();
+        final Connection connection = new Connection(subscriber, useSemaphore);
 
         ReactiveBillingLogger.log("Bind service (thread %s)", Thread.currentThread().getName());
         try {
@@ -53,22 +56,36 @@ public abstract class BaseObservable<T> implements Observable.OnSubscribe<T> {
             }
         }));
 
-        // freeze the current RX thread until service is connected
-        // because bindService() will call the connection callback on the main thread
-        // we want to get back on the current RX thread
-        ReactiveBillingLogger.log("Acquire semaphore until service is ready");
-        semaphore.acquireUninterruptibly();
+        if (useSemaphore) {
+            // freeze the current RX thread until service is connected
+            // because bindService() will call the connection callback on the main thread
+            // we want to get back on the current RX thread
+            ReactiveBillingLogger.log("Acquire semaphore until service is ready (thread %s)", Thread.currentThread().getName());
+            semaphore.acquireUninterruptibly();
 
-        // once the semaphore is released
-        // it means that the service is connected and available
-        //TODO: what happens if the service is never connected?
+            // once the semaphore is released
+            // it means that the service is connected and available
+            //TODO: what happens if the service is never connected?
+            deliverBillingService(subscriber);
+        }
+    }
+
+    private void deliverBillingService(Observer observer) {
         ReactiveBillingLogger.log("Billing service ready (thread %s)", Thread.currentThread().getName());
-        onBillingServiceReady(billingService, subscriber);
+        onBillingServiceReady(billingService, observer);
     }
 
     protected abstract void onBillingServiceReady(BillingService billingService, Observer<? super T> observer);
 
     private class Connection implements ServiceConnection {
+
+        private final Observer observer;
+        private final boolean useSemaphore;
+
+        public Connection(Observer observer, boolean useSemaphore) {
+            this.observer = observer;
+            this.useSemaphore = useSemaphore;
+        }
 
         /**
          * For some reason, that method is always called on the main thread
@@ -81,9 +98,14 @@ public abstract class BaseObservable<T> implements Observable.OnSubscribe<T> {
             IInAppBillingService inAppBillingService = IInAppBillingService.Stub.asInterface(service);
             billingService = new BillingService(context, inAppBillingService);
 
-            // once the service is available, release the semaphore
-            // that is blocking the originating thread
-            semaphore.release();
+            if (useSemaphore) {
+                // once the service is available, release the semaphore
+                // that is blocking the originating thread
+                ReactiveBillingLogger.log("Release semaphore (thread %s)", Thread.currentThread().getName());
+                semaphore.release();
+            } else {
+                deliverBillingService(observer);
+            }
         }
 
         @Override

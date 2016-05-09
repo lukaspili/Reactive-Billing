@@ -34,7 +34,7 @@ The exposed methods are matching the methods of the AIDL billing service `IInApp
 
 ### Response
 
-Each call to the billing service will return a response object.
+Each call to the billing service will return a response object.  
 The response will match the structure of the original `Bundle`, containing at least a response code.
 
 You can check the responses code in the documentation: [In App Billing reference](http://developer.android.com/google/play/billing/billing_reference.html)
@@ -229,10 +229,10 @@ ReactiveBilling.getInstance(getContext())
 
 ## Reactive Billing Example app
 
-You can find the Reactive Billing Example app on the play store
+You can find the Reactive Billing Example app on the play store:
 [https://play.google.com/store/apps/details?id=com.github.lukaspili.reactivebilling.sample](https://play.google.com/store/apps/details?id=com.github.lukaspili.reactivebilling.sample)
 
-The source code is located in the current project, under `sample/`
+The source code is located in the current project, under `sample/`.
 
 
 ## Gradle

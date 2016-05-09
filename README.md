@@ -1,26 +1,27 @@
-# Android Reactive Billing
+# Reactive Billing for Android
 
-Do yourself a favor and try this lightweight reactive wrapper around the In App Billing API v3 for Android.
+Cut the hassle when implementing the In App Billing on Android.
+Reactive Billing is a lightweight reactive wrapper around In App Billing API v3 for Android.
 
 
 ## Features
 
 * **Reactive:** Exposes the In App Billing service methods as `Observable`, allowing to implement easy asynchrounous callbacks and other Rx-related fun stuff.
 
-* **No configuration:** Doesn't require to implement any method on Activity class. It makes it super easy to implement in any architectures (activities/fragments, single activity, etc).
+* **No configuration:** Doesn't require a single line of configuration. It makes it super easy to implement in any architectures (activities/fragments, single activity, etc).
 
-* **Lightweight:** Doesn't make any assumptions on the billing logic you want to implement. It is up to you to implement the logic related to the purchase verification and storage for offline usage.
+* **Lightweight:** Only does what it's supposed to do, and nothing more. It doesn't implement any logic related to the billing: purchase verification, storage for offline usage, etc. It is all up to you.
 
 * **Convenient:** Returns objects rather than bundles.
 
 
-## Support
+## Version
 
 Reactive Billing supports **In App Billing API v3** only.
 The current version (0.1) doesn't support subscriptions yet.
 
 
-## API
+## How does it work?
 
 The Reactive Billing API is accessible through the singleton instance.
 
@@ -28,9 +29,40 @@ The Reactive Billing API is accessible through the singleton instance.
 ReactiveBilling.getInstance(context)
 ```
 
-The methods on `ReactiveBilling` are matching the methods of the AIDL service `IInAppBillingService`.
-With the difference that they return `Observable` objects, also taking care of connecting to the AIDL service.
+The exposed methods are matching the methods of the AIDL billing service `IInAppBillingService`. With the difference that they return `Observable` objects, also taking care of connecting to the AIDL service.
 
+
+### Response
+
+Each call to the billing service will return a response object.
+The response will match the structure of the original `Bundle`, containing at least a response code.
+
+You can check the responses code in the documentation: [In App Billing reference](http://developer.android.com/google/play/billing/billing_reference.html)
+
+
+### onNext / onError
+
+The subscriber will always receive `onNext` if the request to the billing service was executed successfully. It doesn't mean though that the operation was successful. You need to check the response code.
+
+You can find all the responses code and their meaning in the [official documentation.](http://developer.android.com/google/play/billing/billing_reference.html#billing-codes)
+
+The subscriber can also receive `onError` if an exception is thrown during the connection to the AIDL billing service (`RemoteException`). Reactive Billing is not doing any logic to catch the exception and the latter will be propagated to the subscriber.
+
+
+### Threading
+
+Depending on which call and on the current play store cache, the billing service can trigger a synchronous network request. It is then recommended to implement the asynchronous reactive model.
+
+```java
+ReactiveBilling.getInstance(getContext())
+	.getPurchases(PurchaseType.PRODUCT, null)
+	.subscribeOn(Schedulers.io())
+	.observeOn(AndroidSchedulers.mainThread())
+	.subscribe(...)
+```
+
+
+## Methods
 
 ### Is Billing Supported
 
@@ -195,11 +227,12 @@ ReactiveBilling.getInstance(getContext())
 ```
 
 
-## Sample app
+## Reactive Billing Example app
 
-You can find the Reactive Billing sample app on the play store:
-
+You can find the Reactive Billing Example app on the play store
 [https://play.google.com/store/apps/details?id=com.github.lukaspili.reactivebilling.sample](https://play.google.com/store/apps/details?id=com.github.lukaspili.reactivebilling.sample)
+
+The source code is located in the current project, under `sample/`
 
 
 ## Gradle

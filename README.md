@@ -1,6 +1,6 @@
 # Reactive Billing for Android
 
-Cut the hassle when implementing the In App Billing on Android.
+Cut the hassle when implementing the In App Billing on Android.  
 Reactive Billing is a lightweight reactive wrapper around In App Billing API v3 for Android.
 
 
@@ -34,7 +34,7 @@ The exposed methods are matching the methods of the AIDL billing service `IInApp
 
 ### Response
 
-Each call to the billing service will return a response object.  
+Each call to the billing service will return a response object.
 The response will match the structure of the original `Bundle`, containing at least a response code.
 
 You can check the responses code in the documentation: [In App Billing reference](http://developer.android.com/google/play/billing/billing_reference.html)

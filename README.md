@@ -10,7 +10,7 @@ Reactive Billing is a lightweight reactive wrapper around In App Billing API v3 
 
 * **No configuration:** Doesn't require a single line of configuration. It makes it super easy to implement in any architectures (activities/fragments, single activity, etc).
 
-* **Lightweight:** Only does what it's supposed to do, and nothing more. It doesn't implement any logic related to the billing: purchase verification, storage for offline usage, etc. It is all up to you.
+* **Lightweight:** Only does what it's supposed to do, nothing more. It doesn't implement any logic related to the billing: purchase verification, storage for offline usage, etc. It is all up to you.
 
 * **Convenient:** Returns objects rather than bundles.
 
@@ -26,10 +26,10 @@ The current version (0.1) doesn't support subscriptions yet.
 The Reactive Billing API is accessible through the singleton instance.
 
 ```java
-ReactiveBilling.getInstance(context)
+ReactiveBilling.getInstance(context);
 ```
 
-The exposed methods are matching the methods of the AIDL billing service `IInAppBillingService`. With the difference that they return `Observable` objects, also taking care of connecting to the AIDL service.
+The exposed methods are matching the methods of the AIDL billing service `IInAppBillingService`. With the difference that they return `Observable` objects, also taking care of connecting to the AIDL billing service.
 
 
 ### Response
@@ -37,21 +37,21 @@ The exposed methods are matching the methods of the AIDL billing service `IInApp
 Each call to the billing service will return a response object.  
 The response will match the structure of the original `Bundle`, containing at least a response code.
 
-You can check the responses code in the documentation: [In App Billing reference](http://developer.android.com/google/play/billing/billing_reference.html)
+You can check the response codes in the documentation: [In App Billing reference](http://developer.android.com/google/play/billing/billing_reference.html)
 
 
 ### onNext / onError
 
-The subscriber will always receive `onNext` if the request to the billing service was executed successfully. It doesn't mean though that the operation was successful. You need to check the response code.
+The subscriber will always receive `onNext` if the request to the billing service is executed successfully. But it doesn't mean that the response of the request is a success. You need to check the returned response code.
 
-You can find all the responses code and their meaning in the documentation [In App Billing reference](http://developer.android.com/google/play/billing/billing_reference.html#billing-codes)
+You can find all the response codes and their meaning in the documentation [In App Billing reference](http://developer.android.com/google/play/billing/billing_reference.html#billing-codes)
 
 The subscriber can also receive `onError` if an exception is thrown during the connection to the AIDL billing service (`RemoteException`). Reactive Billing is not doing any logic to catch the exception and the latter will be propagated to the subscriber.
 
 
 ### Threading
 
-Depending on which call and on the current play store cache, the billing service can trigger a synchronous network request. It is then recommended to implement the asynchronous reactive model.
+Depending on which call and on the current Play Store cache, the billing service can trigger a synchronous network request. It is then recommended to implement the asynchronous reactive model when interacting with the service.
 
 ```java
 ReactiveBilling.getInstance(getContext())
@@ -237,7 +237,7 @@ The source code is located in the current project, under `sample/`.
 
 ## Gradle
 
-Reactive Billing is available on maven central.
+Reactive Billing is available on Maven Central.
 
 ```groovy
 dependencies {

@@ -318,7 +318,7 @@ Reactive Billing is available on Maven Central.
 
 ```groovy
 dependencies {
-	compile 'com.github.lukaspili.reactive-billing:reactive-billing:0.1'
+	compile 'com.github.lukaspili.reactive-billing:reactive-billing:0.2'
 
 	// you would also probably need rxjava and rxandroid
 	compile 'io.reactivex:rxjava:1.1.5'

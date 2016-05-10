@@ -1,6 +1,6 @@
 # Reactive Billing for Android
 
-Cut the hassle when implementing the In App Billing on Android.  
+Cut the hassle when implementing in-app purchases on Android.  
 Reactive Billing is a lightweight reactive wrapper around In App Billing API v3 for Android.
 
 

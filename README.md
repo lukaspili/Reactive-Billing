@@ -327,6 +327,11 @@ dependencies {
 ```
 
 
+## Changelog
+
+See the [changelog](https://github.com/lukaspili/Reactive-Billing/blob/master/CHANGELOG.md)
+
+
 ## Acknowledgements
 
 * [Reactive Location](https://github.com/mcharmas/Android-ReactiveLocation)

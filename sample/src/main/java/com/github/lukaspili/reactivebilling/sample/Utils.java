@@ -9,7 +9,7 @@ public class Utils {
         String reason;
         switch (responseCode) {
             case -1:
-                reason = "CANCELED PURCHASE FLOW";
+                reason = "UNKNOWN";
                 break;
             case 1:
                 reason = "BILLING_RESPONSE_RESULT_USER_CANCELED";

@@ -5,14 +5,14 @@ import android.os.RemoteException;
 
 import com.github.lukaspili.reactivebilling.BillingService;
 import com.github.lukaspili.reactivebilling.model.PurchaseType;
-import com.github.lukaspili.reactivebilling.response.GetPurchases;
+import com.github.lukaspili.reactivebilling.response.GetPurchasesResponse;
 
 import rx.Observable;
 import rx.Observer;
 
-public class GetPurchasesObservable extends BaseObservable<GetPurchases> {
+public class GetPurchasesObservable extends BaseObservable<GetPurchasesResponse> {
 
-    public static Observable<GetPurchases> create(Context context, PurchaseType purchaseType, String continuationToken) {
+    public static Observable<GetPurchasesResponse> create(Context context, PurchaseType purchaseType, String continuationToken) {
         return Observable.create(new GetPurchasesObservable(context, purchaseType, continuationToken));
     }
 
@@ -26,7 +26,7 @@ public class GetPurchasesObservable extends BaseObservable<GetPurchases> {
     }
 
     @Override
-    protected void onBillingServiceReady(BillingService billingService, Observer<? super GetPurchases> observer) {
+    protected void onBillingServiceReady(BillingService billingService, Observer<? super GetPurchasesResponse> observer) {
         try {
             observer.onNext(billingService.getPurchases(purchaseType, continuationToken));
             observer.onCompleted();

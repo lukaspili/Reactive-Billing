@@ -5,11 +5,11 @@ import android.app.PendingIntent;
 /**
  * Created by lukasz on 06/05/16.
  */
-public class GetBuyIntent extends Response {
+public class GetBuyIntentResponse extends Response {
 
     private final PendingIntent intent;
 
-    public GetBuyIntent(int responseCode, PendingIntent intent) {
+    public GetBuyIntentResponse(int responseCode, PendingIntent intent) {
         super(responseCode);
         this.intent = intent;
     }

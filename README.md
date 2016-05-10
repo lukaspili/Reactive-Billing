@@ -8,7 +8,7 @@ Reactive Billing is a lightweight reactive wrapper around In App Billing API v3 
 
 * **Reactive:** Exposes the In App Billing service methods as `Observable`, allowing to implement easy asynchrounous callbacks and other Rx-related fun stuff.
 
-* **No configuration:** Doesn't require a single line of configuration. It makes it super easy to implement in any architectures (activities/fragments, single activity, etc).
+* **No configuration:** Doesn't require to implement activities `onActivityResult()`. It makes it super easy to implement in any architectures (activities/fragments, single activity, etc).
 
 * **Lightweight:** Only does what it's supposed to do, nothing more. It doesn't implement any logic related to the billing: purchase verification, storage for offline usage, etc. It is all up to you.
 
@@ -18,7 +18,7 @@ Reactive Billing is a lightweight reactive wrapper around In App Billing API v3 
 ## Version
 
 Reactive Billing supports **In App Billing API v3** only.  
-The current version (0.1) doesn't support subscriptions yet.
+The current version (0.2) doesn't support subscriptions yet.
 
 
 ## How does it work?
@@ -44,7 +44,7 @@ You can check the response codes in the documentation: [In App Billing reference
 
 The subscriber will always receive `onNext` if the request to the billing service is executed successfully. But it doesn't mean that the response of the request is a success. You need to check the returned response code.
 
-You can find all the response codes and their meaning in the documentation [In App Billing reference](http://developer.android.com/google/play/billing/billing_reference.html#billing-codes)
+You can find all the response codes and their meaning in the documentation: [In App Billing reference](http://developer.android.com/google/play/billing/billing_reference.html#billing-codes)
 
 The subscriber can also receive `onError` if an exception is thrown during the connection to the AIDL billing service (`RemoteException`). Reactive Billing is not doing any logic to catch the exception and the latter will be propagated to the subscriber.
 
@@ -66,6 +66,9 @@ ReactiveBilling.getInstance(getContext())
 
 ### Is Billing Supported
 
+The Rx version of `IInAppBillingService.isBillingSupported()`
+
+
 ```java
 ReactiveBilling.getInstance(getContext()).isBillingSupported(PurchaseType.PRODUCT)
 	.subscribeOn(Schedulers.io())
@@ -73,9 +76,14 @@ ReactiveBilling.getInstance(getContext()).isBillingSupported(PurchaseType.PRODUC
 	.subscribe(new Action1<Response>() {
 		@Override
 		public void call(Response response) {
-		   if(response.isSuccess()) {
-		   // in app billing is supported
+			if(response.isSuccess()) {
+				// in app billing is supported
 			}
+		}
+	}, new Action1<Throwable>() {
+		@Override
+		public void call(Throwable throwable) {
+		    
 		}
 	});
 ```
@@ -83,16 +91,19 @@ ReactiveBilling.getInstance(getContext()).isBillingSupported(PurchaseType.PRODUC
 
 ###  Get sku details
 
+The Rx version of [`IInAppBillingService.getSkuDetails()`](http://developer.android.com/google/play/billing/billing_reference.html#getSkuDetails)
+
+
 ```java
 ReactiveBilling.getInstance(getContext())
 	.getSkuDetails(PurchaseType.PRODUCT, "coffee", "beer")
 	.subscribeOn(Schedulers.io())
 	.observeOn(AndroidSchedulers.mainThread())
-	.subscribe(new Action1<GetSkuDetails>() {
+	.subscribe(new Action1<GetSkuDetailsResponse>() {
 	    @Override
-	    public void call(GetSkuDetails getSkuDetails) {
-			if (getSkuDetails.isSuccess()) {
-	            getSkuDetails.getData() // list of items
+	    public void call(GetSkuDetailsResponse response) {
+			if (response.isSuccess()) {
+	            response.getList() // list of sku details
 	        }
 	    }
 	}, new Action1<Throwable>() {
@@ -106,16 +117,19 @@ ReactiveBilling.getInstance(getContext())
 
 ### Get purchases
 
+The Rx version of [`IInAppBillingService.getPurchases()`](http://developer.android.com/google/play/billing/billing_reference.html#getPurchases)
+
+
 ```java
 ReactiveBilling.getInstance(getContext())
 	.getPurchases(PurchaseType.PRODUCT, null)
 	.subscribeOn(Schedulers.io())
 	.observeOn(AndroidSchedulers.mainThread())
-	.subscribe(new Action1<GetPurchases>() {
+	.subscribe(new Action1<GetPurchasesResponse>() {
 	    @Override
-	    public void call(GetPurchases getPurchases) {
-	        if(getPurchases.isSuccess()) {
-		        getPurchases.getItems() // items
+	    public void call(GetPurchasesResponse response) {
+	        if(response.isSuccess()) {
+		        response.getList() // list of purchases
 		    }
 	    }
 	}, new Action1<Throwable>() {
@@ -129,11 +143,43 @@ ReactiveBilling.getInstance(getContext())
 
 ### Buy product
 
-Buying a product is a little bit different because it will start a purchase flow, meaning it will show the Play store purchasing dialog.
+Buying a product is a little bit different because it's a two step process.
 
-#### Subscribe to purchase flow
+* Start the purchase flow (show the Play store purchasing dialog)
+* Receive the purchase flow result (receive the result from previous dialog)
 
-Because of the Android lifecycle, your activity can be destroyed and recreated while the purchase flow is visible (from configuration changes for instance). Therefore the Reactive Billing library needs to be detached/attached when the activity is recreated.
+
+#### Start the purchase flow
+
+The Rx version of [`IInAppBillingService.getBuyIntent()`](http://developer.android.com/google/play/billing/billing_reference.html#getBuyIntent)
+
+In addition, if the request is successful, Reactive Billing will start the purchase flow automatically.
+
+```java
+ReactiveBilling.getInstance(getContext())
+	.startPurchase(skuDetails.getProductId(), skuDetails.getPurchaseType(), null, null)
+	.subscribeOn(Schedulers.io())
+	.observeOn(AndroidSchedulers.mainThread())
+	.subscribe(new Action1<Response>() {
+	    @Override
+	    public void call(Response response) {
+	        if (response.isSuccess()) {
+	            // purchase flow was started successfully, nothing to do here
+	        } else {
+	            // handle cannot start purchase flow
+	        }
+	    }
+	}, new Action1<Throwable>() {
+	    @Override
+	    public void call(Throwable throwable) {
+	        
+	    }
+	});
+```
+
+#### Receive purchase flow results
+
+Because of the Android lifecycle, your activity can be destroyed and recreated while the purchase flow is visible. Therefore the subscriber for the purchase flow events needs to be unsubscribed and subscribed again when the activity is recreated.
 
 Reactive Billing requires to subscribe for the purchase flow events during the initialisation, which is usually represented by the following methods:
 
@@ -143,24 +189,32 @@ Reactive Billing requires to subscribe for the purchase flow events during the i
 
 ```java
 ReactiveBilling.getInstance(this).purchaseFlow()
-    .subscribe(new Action1<DidBuy>() {
+    .subscribe(new Action1<PurchaseResponse>() {
         @Override
-        public void call(DidBuy didBuy) {
-            if (didBuy.isSuccess()) {
-                didBuy.getPurchase(); // the purchased product
+        public void call(PurchaseResponse response) {
+            if (response.isSuccess()) {
+                response.getPurchase(); // the purchased product
             }
         }
     });
 ```
 
-#### Start the purchase flow
-
-Once your class is subscribed to the purchase flow, you can start the purchase flow for a product
-
+You would also want to check if the purchase flow was cancelled.
 
 ```java
-ReactiveBilling.getInstance(this).buy("your_product_id", PurchaseType.PRODUCT, "your dev payload");
+if (response.isSuccess()) {
+    response.getPurchase(); // the purchased product
+} else if(response.isCancelled()) {
+	// purchase flow cancelled
+} else {
+	response.getResponseCode(); // purchase flow failed, handle the response code
+}
 ```
+
+
+#### Extras
+
+In order to be able to differentiate properly the events receiving in the purchase flow observable, you can provide an "extras" bundle when starting the purchase flow. 
 
 
 #### Full example
@@ -175,12 +229,14 @@ public class BuyActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         subscription = ReactiveBilling.getInstance(this).purchaseFlow()
-            .subscribe(new Action1<DidBuy>() {
+            .subscribe(new Action1<PurchaseResponse>() {
                 @Override
-                public void call(DidBuy didBuy) {
+                public void call(PurchaseResponse response) {
                     // receives the result of the purchase flow
-                    if (didBuy.isSuccess()) {
-                        didBuy.getPurchase(); // the purchased product
+                    if (response.isSuccess()) {
+                        response.getPurchase(); // the purchased product
+                    } else {
+                    	// handle
                     }
                 }
             });
@@ -188,7 +244,25 @@ public class BuyActivity extends Activity {
 
     public void onProductClick(String productId) {
         // start the purchase flow
-        ReactiveBilling.getInstance(this).buy(productId, PurchaseType.PRODUCT, "your dev payload");
+        ReactiveBilling.getInstance(getContext())
+			.startPurchase(productId, PurchaseType.PRODUCT, null, null)
+			.subscribeOn(Schedulers.io())
+			.observeOn(AndroidSchedulers.mainThread())
+			.subscribe(new Action1<Response>() {
+			    @Override
+			    public void call(Response response) {
+			        if (response.isSuccess()) {
+			            // purchase flow was started successfully, nothing to do here
+			        } else {
+			            // handle cannot start purchase flow
+			        }
+			    }
+			}, new Action1<Throwable>() {
+			    @Override
+			    public void call(Throwable throwable) {
+			        // handle
+			    }
+			});
     }
 
     @Override
@@ -205,6 +279,9 @@ public class BuyActivity extends Activity {
 
 
 ### Consume purchase
+
+The Rx version of `IInAppBillingService.consumePurchase()`
+
 
 ```java
 ReactiveBilling.getInstance(getContext())

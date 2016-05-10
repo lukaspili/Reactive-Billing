@@ -17,8 +17,8 @@ import android.view.ViewGroup;
 import com.github.lukaspili.reactivebilling.ReactiveBilling;
 import com.github.lukaspili.reactivebilling.model.PurchaseType;
 import com.github.lukaspili.reactivebilling.model.SkuDetails;
-import com.github.lukaspili.reactivebilling.response.DidBuy;
-import com.github.lukaspili.reactivebilling.response.GetSkuDetails;
+import com.github.lukaspili.reactivebilling.response.GetSkuDetailsResponse;
+import com.github.lukaspili.reactivebilling.response.PurchaseResponse;
 import com.github.lukaspili.reactivebilling.response.Response;
 import com.github.lukaspili.reactivebilling.sample.R;
 import com.github.lukaspili.reactivebilling.sample.TabsAdapter;
@@ -41,7 +41,6 @@ public class ShopFragment extends Fragment implements TabsAdapter.Tab {
     private ShopAdapter adapter = new ShopAdapter();
     private Subscription subscription;
 
-    private boolean consumeAfterBuying;
     private Dialog dialog;
 
     @Nullable
@@ -103,33 +102,38 @@ public class ShopFragment extends Fragment implements TabsAdapter.Tab {
 
         Log.d(getClass().getName(), "Subscribe to purchase flow");
         subscription = ReactiveBilling.getInstance(getContext()).purchaseFlow()
-                .flatMap(new Func1<DidBuy, Observable<DidBuy>>() {
+                .flatMap(new Func1<PurchaseResponse, Observable<PurchaseResponse>>() {
                     @Override
-                    public Observable<DidBuy> call(final DidBuy didBuy) {
-                        if (consumeAfterBuying && didBuy.isSuccess()) {
+                    public Observable<PurchaseResponse> call(final PurchaseResponse purchaseResponse) {
+                        // shall we consume directly?
+                        boolean consume = purchaseResponse.getExtras().getBoolean("consume");
+
+                        if (purchaseResponse.isSuccess() && consume) {
                             Log.d(getClass().getName(), "Item bought, consume it directly");
-                            return ReactiveBilling.getInstance(getContext()).consumePurchase(didBuy.getPurchase().getPurchaseToken())
+                            return ReactiveBilling.getInstance(getContext()).consumePurchase(purchaseResponse.getPurchase().getPurchaseToken())
                                     .subscribeOn(Schedulers.io())
                                     .observeOn(AndroidSchedulers.mainThread())
-                                    .map(new Func1<Response, DidBuy>() {
+                                    .map(new Func1<Response, PurchaseResponse>() {
                                         @Override
-                                        public DidBuy call(Response response) {
-                                            if (response.isSuccess()) {
-                                                return didBuy;
+                                        public PurchaseResponse call(Response consumeResponse) {
+                                            if (consumeResponse.isSuccess()) {
+                                                return purchaseResponse;
                                             } else {
-                                                return DidBuy.invalid(response.getResponseCode());
+                                                // you would probably want to have something better in a real world app
+                                                return new PurchaseResponse(consumeResponse.getResponseCode(), null, null, null, false);
                                             }
                                         }
                                     });
                         } else {
-                            return Observable.just(didBuy);
+                            return Observable.just(purchaseResponse);
                         }
                     }
                 })
-                .subscribe(new Action1<DidBuy>() {
+                .subscribe(new Action1<PurchaseResponse>() {
                     @Override
-                    public void call(DidBuy didBuy) {
-                        didBuy(didBuy);
+                    public void call(PurchaseResponse purchaseResponse) {
+                        if (getActivity() == null) return;
+                        didPurchase(purchaseResponse);
                     }
                 });
 
@@ -155,12 +159,12 @@ public class ShopFragment extends Fragment implements TabsAdapter.Tab {
                 .getSkuDetails(PurchaseType.PRODUCT, "coffee", "beer")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<GetSkuDetails>() {
+                .subscribe(new Action1<GetSkuDetailsResponse>() {
                     @Override
-                    public void call(GetSkuDetails getSkuDetails) {
+                    public void call(GetSkuDetailsResponse response) {
                         if (getActivity() == null) return;
                         refreshLayout.setRefreshing(false);
-                        didSucceedGetSkuDetails(getSkuDetails);
+                        didSucceedGetSkuDetails(response);
                     }
                 }, new Action1<Throwable>() {
                     @Override
@@ -172,9 +176,9 @@ public class ShopFragment extends Fragment implements TabsAdapter.Tab {
                 });
     }
 
-    private void didSucceedGetSkuDetails(GetSkuDetails getSkuDetails) {
-        if (getSkuDetails.isSuccess()) {
-            adapter.bind(getSkuDetails.getData());
+    private void didSucceedGetSkuDetails(GetSkuDetailsResponse getSkuDetailsResponse) {
+        if (getSkuDetailsResponse.isSuccess()) {
+            adapter.bind(getSkuDetailsResponse.getList());
         } else {
             // error
             Log.d(getClass().getName(), "Error");
@@ -188,26 +192,66 @@ public class ShopFragment extends Fragment implements TabsAdapter.Tab {
 
     // Purchase
 
-    private void purchaseSkuDetails(SkuDetails skuDetails, boolean consume) {
+    private void purchaseSkuDetails(SkuDetails skuDetails, final boolean consume) {
         Log.d(getClass().getName(), String.format("Purchase %s", skuDetails.getTitle()));
 
-        consumeAfterBuying = consume;
+        final Bundle extras = new Bundle();
+        extras.putBoolean("consume", consume);
 
         ReactiveBilling.getInstance(getContext())
-                .buy(skuDetails.getProductId(), skuDetails.getPurchaseType(), null);
+                .startPurchase(skuDetails.getProductId(), skuDetails.getPurchaseType(), null, extras)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Response>() {
+                    @Override
+                    public void call(Response response) {
+                        if (getActivity() == null) return;
+
+                        if (response.isSuccess()) {
+                            // purchase flow was started successfully, nothing to do here
+                        } else {
+                            // handle cannot start purchase flow
+                            didFailStartPurchase(response);
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        if (getActivity() == null) return;
+                        didFailStartPurchase(new Response(-1));
+                    }
+                });
     }
 
-    private void didBuy(DidBuy didBuy) {
-        Log.d(getClass().getName(), String.format("Did buy, success: %b", didBuy.isSuccess()));
+    private void didFailStartPurchase(Response response) {
+        Log.d(getClass().getName(), "Did fail to start purchase");
+
+        dialog = new AlertDialog.Builder(getContext())
+                .setTitle("Cannot buy the item")
+                .setMessage(Utils.getMessage(response.getResponseCode()))
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setCancelable(true)
+                .show();
+    }
+
+    private void didPurchase(PurchaseResponse response) {
+        Log.d(getClass().getName(), String.format("Did purchase, success: %b", response.isSuccess()));
 
         String title;
         String reason;
-        if (didBuy.isSuccess()) {
+        if (response.isSuccess()) {
             title = "Item bought!";
-            reason = "Congrats on buying a " + didBuy.getPurchase().getProductId();
+            reason = "Congrats on buying a " + response.getPurchase().getProductId();
+        } else if (response.isCancelled()) {
+            title = "Purchase cancelled";
+            reason = "Nothing was billed";
         } else {
             title = "Cannot buy the item";
-            reason = Utils.getMessage(didBuy.getResponseCode());
+            reason = Utils.getMessage(response.getResponseCode());
         }
 
         dialog = new AlertDialog.Builder(getContext())

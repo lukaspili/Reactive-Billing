@@ -24,6 +24,8 @@ public class ReactiveBillingShadowActivity extends Activity {
 
     private static final int REQUEST_CODE = 1337;
 
+    private Bundle extras;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +51,7 @@ public class ReactiveBillingShadowActivity extends Activity {
     private void handleIntent(Intent intent) {
         ReactiveBillingLogger.log("Shadow activity - handle intent");
 
+        extras = intent.getBundleExtra("BUY_EXTRAS");
         PendingIntent buyIntent = intent.getParcelableExtra("BUY_INTENT");
 
         try {
@@ -59,6 +62,21 @@ public class ReactiveBillingShadowActivity extends Activity {
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        if (extras != null) {
+            outState.putBundle("BUY_EXTRAS", extras);
+        }
+
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        extras = savedInstanceState.getBundle("BUY_EXTRAS");
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode != REQUEST_CODE) {
             return; // can it happen?
@@ -66,7 +84,7 @@ public class ReactiveBillingShadowActivity extends Activity {
 
         ReactiveBillingLogger.log("Shadow activity - on activity result");
 
-        ReactiveBilling.getInstance(this).getPurchaseFlowService().onActivityResult(resultCode, data);
+        ReactiveBilling.getInstance(this).getPurchaseFlowService().onActivityResult(resultCode, data, extras);
         finish();
     }
 }

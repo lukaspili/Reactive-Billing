@@ -15,16 +15,18 @@
 package com.github.lukaspili.reactivebilling;
 
 import android.content.Context;
+import android.os.Bundle;
 
 import com.github.lukaspili.reactivebilling.model.PurchaseType;
 import com.github.lukaspili.reactivebilling.observable.BillingServiceObservable;
 import com.github.lukaspili.reactivebilling.observable.ConsumePurchaseObservable;
+import com.github.lukaspili.reactivebilling.observable.GetBuyIntentObservable;
 import com.github.lukaspili.reactivebilling.observable.GetPurchasesObservable;
 import com.github.lukaspili.reactivebilling.observable.GetSkuDetailsObservable;
 import com.github.lukaspili.reactivebilling.observable.IsBillingSupportedObservable;
-import com.github.lukaspili.reactivebilling.response.DidBuy;
-import com.github.lukaspili.reactivebilling.response.GetPurchases;
-import com.github.lukaspili.reactivebilling.response.GetSkuDetails;
+import com.github.lukaspili.reactivebilling.response.PurchaseResponse;
+import com.github.lukaspili.reactivebilling.response.GetPurchasesResponse;
+import com.github.lukaspili.reactivebilling.response.GetSkuDetailsResponse;
 import com.github.lukaspili.reactivebilling.response.Response;
 
 import rx.Observable;
@@ -79,20 +81,20 @@ public class ReactiveBilling {
         return ConsumePurchaseObservable.create(context, purchaseToken);
     }
 
-    public Observable<GetSkuDetails> getSkuDetails(PurchaseType purchaseType, String... productIds) {
+    public Observable<GetSkuDetailsResponse> getSkuDetails(PurchaseType purchaseType, String... productIds) {
         return GetSkuDetailsObservable.create(context, purchaseType, productIds);
     }
 
-    public Observable<GetPurchases> getPurchases(PurchaseType purchaseType, String continuationToken) {
+    public Observable<GetPurchasesResponse> getPurchases(PurchaseType purchaseType, String continuationToken) {
         return GetPurchasesObservable.create(context, purchaseType, continuationToken);
     }
 
-    public Observable<DidBuy> purchaseFlow() {
-        return purchaseFlowService.flow();
+    public Observable<Response> startPurchase(String productId, PurchaseType purchaseType, String developerPayload, Bundle extras) {
+        return GetBuyIntentObservable.create(context, purchaseFlowService, productId, purchaseType, developerPayload, extras);
     }
 
-    public void buy(String productId, PurchaseType purchaseType, String developerPayload) {
-        purchaseFlowService.requestFlow(productId, purchaseType, developerPayload);
+    public Observable<PurchaseResponse> purchaseFlow() {
+        return purchaseFlowService.getObservable();
     }
 
     PurchaseFlowService getPurchaseFlowService() {

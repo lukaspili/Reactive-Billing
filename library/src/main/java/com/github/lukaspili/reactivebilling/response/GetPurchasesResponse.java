@@ -7,32 +7,32 @@ import java.util.List;
 /**
  * Created by lukasz on 04/05/16.
  */
-public class GetPurchases extends Response {
+public class GetPurchasesResponse extends Response {
 
-    private final List<Item> items;
+    private final List<PurchaseResponse> list;
     private final String continuationToken;
 
-    public GetPurchases(int responseCode, List<Item> items, String continuationToken) {
+    public GetPurchasesResponse(int responseCode, List<PurchaseResponse> list, String continuationToken) {
         super(responseCode);
-        this.items = items;
+        this.list = list;
         this.continuationToken = continuationToken;
     }
 
-    public List<Item> getItems() {
-        return items;
+    public List<PurchaseResponse> getList() {
+        return list;
     }
 
     public String getContinuationToken() {
         return continuationToken;
     }
 
-    public static class Item {
+    public static class PurchaseResponse {
 
         private final String productId;
         private final String signature;
         private final Purchase purchase;
 
-        public Item(String productId, String signature, Purchase purchase) {
+        public PurchaseResponse(String productId, String signature, Purchase purchase) {
             this.productId = productId;
             this.signature = signature;
             this.purchase = purchase;

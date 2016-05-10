@@ -17,7 +17,7 @@ import android.view.ViewGroup;
 import com.github.lukaspili.reactivebilling.ReactiveBilling;
 import com.github.lukaspili.reactivebilling.model.Purchase;
 import com.github.lukaspili.reactivebilling.model.PurchaseType;
-import com.github.lukaspili.reactivebilling.response.GetPurchases;
+import com.github.lukaspili.reactivebilling.response.GetPurchasesResponse;
 import com.github.lukaspili.reactivebilling.response.Response;
 import com.github.lukaspili.reactivebilling.sample.R;
 import com.github.lukaspili.reactivebilling.sample.TabsAdapter;
@@ -108,12 +108,12 @@ public class InventoryFragment extends Fragment implements TabsAdapter.Tab {
                 .getPurchases(PurchaseType.PRODUCT, null)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<GetPurchases>() {
+                .subscribe(new Action1<GetPurchasesResponse>() {
                     @Override
-                    public void call(GetPurchases getPurchases) {
+                    public void call(GetPurchasesResponse getPurchasesResponse) {
                         if (getActivity() == null) return;
                         refreshLayout.setRefreshing(false);
-                        didSucceedGetPurchases(getPurchases);
+                        didSucceedGetPurchases(getPurchasesResponse);
                     }
                 }, new Action1<Throwable>() {
                     @Override
@@ -125,13 +125,13 @@ public class InventoryFragment extends Fragment implements TabsAdapter.Tab {
                 });
     }
 
-    private void didSucceedGetPurchases(GetPurchases getPurchases) {
-        if (getPurchases.isSuccess()) {
-            Observable.from(getPurchases.getItems())
-                    .map(new Func1<GetPurchases.Item, Purchase>() {
+    private void didSucceedGetPurchases(GetPurchasesResponse getPurchasesResponse) {
+        if (getPurchasesResponse.isSuccess()) {
+            Observable.from(getPurchasesResponse.getList())
+                    .map(new Func1<GetPurchasesResponse.PurchaseResponse, Purchase>() {
                         @Override
-                        public Purchase call(GetPurchases.Item item) {
-                            return item.getPurchase();
+                        public Purchase call(GetPurchasesResponse.PurchaseResponse purchaseResponse) {
+                            return purchaseResponse.getPurchase();
                         }
                     })
                     .toList()

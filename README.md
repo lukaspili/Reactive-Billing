@@ -18,7 +18,7 @@ Reactive Billing is a lightweight reactive wrapper around In App Billing API v3 
 ## Version
 
 Reactive Billing supports **In App Billing API v3** only.  
-The current version (0.2) doesn't support subscriptions yet.
+The current version (0.2) doesn't support subscriptions yet, but it's coming soon.
 
 
 ## How does it work?
@@ -30,6 +30,8 @@ ReactiveBilling.getInstance(context);
 ```
 
 The exposed methods are matching the methods of the AIDL billing service `IInAppBillingService`. With the difference that they return `Observable` objects, also taking care of connecting to the AIDL billing service.
+
+For a complete setup example, please read the documentation below and check the `sample` project.
 
 
 ### Response
@@ -314,11 +316,12 @@ The source code is located in the current project, under `sample/`.
 
 ## Gradle
 
-Reactive Billing is available on Maven Central.
+Reactive Billing is available on Maven Central.  
+Be sure to grab the `aar` package.
 
 ```groovy
 dependencies {
-	compile 'com.github.lukaspili.reactive-billing:reactive-billing:0.2'
+	compile 'com.github.lukaspili.reactive-billing:reactive-billing:0.2@aar'
 
 	// you would also probably need rxjava and rxandroid
 	compile 'io.reactivex:rxjava:1.1.5'

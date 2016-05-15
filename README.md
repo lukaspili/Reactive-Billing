@@ -323,8 +323,11 @@ Be sure to grab the `aar` package.
 dependencies {
 	compile 'com.github.lukaspili.reactive-billing:reactive-billing:0.2@aar'
 
-	// you would also probably need rxjava and rxandroid
+	// reactive billing requires the following dependencies
 	compile 'io.reactivex:rxjava:1.1.5'
+	compile 'com.jakewharton.rxrelay:rxrelay:1.1.0'
+
+	// you would probably want the rx-android dependency as well
 	compile 'io.reactivex:rxandroid:1.2.0'
 }
 ```

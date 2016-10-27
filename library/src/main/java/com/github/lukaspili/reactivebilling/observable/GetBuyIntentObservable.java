@@ -3,6 +3,8 @@ package com.github.lukaspili.reactivebilling.observable;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import com.github.lukaspili.reactivebilling.BillingService;
 import com.github.lukaspili.reactivebilling.PurchaseFlowService;
 import com.github.lukaspili.reactivebilling.ReactiveBilling;
@@ -14,7 +16,10 @@ import rx.Observer;
 
 public class GetBuyIntentObservable extends BaseObservable<Response> {
 
-    public static Observable<Response> create(Context context, PurchaseFlowService purchaseFlowService, String productId, PurchaseType purchaseType, String developerPayload, Bundle extras) {
+    @NonNull public static Observable<Response> create(@NonNull Context context,
+        @NonNull PurchaseFlowService purchaseFlowService, @NonNull String productId,
+        @NonNull PurchaseType purchaseType, @Nullable String developerPayload,
+        @Nullable Bundle extras) {
         return Observable.create(new GetBuyIntentObservable(context, purchaseFlowService, productId, purchaseType, developerPayload, extras));
     }
 

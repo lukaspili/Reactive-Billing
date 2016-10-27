@@ -1,8 +1,7 @@
 package com.github.lukaspili.reactivebilling.parser;
 
-import com.github.lukaspili.reactivebilling.ReactiveBillingLogger;
+import com.github.lukaspili.reactivebilling.ReactiveBilling;
 import com.github.lukaspili.reactivebilling.model.Purchase;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -12,13 +11,13 @@ import org.json.JSONObject;
 public class PurchaseParser {
 
     public static Purchase parse(String value) {
-        ReactiveBillingLogger.log("purchase json: %s", value);
+        ReactiveBilling.log(null, "purchase json: %s", value);
 
         JSONObject json;
         try {
             json = new JSONObject(value);
         } catch (JSONException e) {
-            ReactiveBillingLogger.log(e, "Cannot parse purchase json");
+            ReactiveBilling.log(e, "Cannot parse purchase json");
             return null;
         }
 

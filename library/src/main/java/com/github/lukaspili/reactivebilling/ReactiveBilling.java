@@ -16,7 +16,6 @@ package com.github.lukaspili.reactivebilling;
 
 import android.content.Context;
 import android.os.Bundle;
-
 import com.github.lukaspili.reactivebilling.model.PurchaseType;
 import com.github.lukaspili.reactivebilling.observable.BillingServiceObservable;
 import com.github.lukaspili.reactivebilling.observable.ConsumePurchaseObservable;
@@ -24,40 +23,29 @@ import com.github.lukaspili.reactivebilling.observable.GetBuyIntentObservable;
 import com.github.lukaspili.reactivebilling.observable.GetPurchasesObservable;
 import com.github.lukaspili.reactivebilling.observable.GetSkuDetailsObservable;
 import com.github.lukaspili.reactivebilling.observable.IsBillingSupportedObservable;
-import com.github.lukaspili.reactivebilling.response.PurchaseResponse;
 import com.github.lukaspili.reactivebilling.response.GetPurchasesResponse;
 import com.github.lukaspili.reactivebilling.response.GetSkuDetailsResponse;
+import com.github.lukaspili.reactivebilling.response.PurchaseResponse;
 import com.github.lukaspili.reactivebilling.response.Response;
-
 import rx.Observable;
 
 public class ReactiveBilling {
 
     private static ReactiveBilling instance;
-    private static ReactiveBillingLogger logger;
+    private static Logger logger = Logger.DEFAULT;
 
     public static ReactiveBilling getInstance(Context context) {
         if (instance == null) {
             instance = new ReactiveBilling(context.getApplicationContext(), new PurchaseFlowService(context.getApplicationContext()));
-
-            // logger is disabled by default
-            if (logger == null) {
-                initLogger(false);
-            }
         }
         return instance;
     }
 
-
-    public static void initLogger(boolean isEnabled) {
-        if (logger != null) {
-            throw new IllegalStateException("Logger instance is already set");
-        }
-
-        logger = new ReactiveBillingLogger(isEnabled);
+    public static void setLogger(Logger logger) {
+        ReactiveBilling.logger = logger;
     }
 
-    static ReactiveBillingLogger getLogger() {
+    static Logger getLogger() {
         return logger;
     }
 
@@ -99,5 +87,25 @@ public class ReactiveBilling {
 
     PurchaseFlowService getPurchaseFlowService() {
         return purchaseFlowService;
+    }
+
+    // Logging convenience methods
+    public static void log(Throwable t, String message, Object... args) {
+        String log = String.format(message, args);
+
+        if (t != null) {
+            StringBuilder logBuilder = new StringBuilder(log);
+            logBuilder.append('\n');
+            logBuilder.append(t.getClass().getCanonicalName()).append(": ").append(t.getLocalizedMessage()).append('\n');
+
+            for (StackTraceElement el : t.getStackTrace()) {
+                logBuilder.append("    at ").append(el.getClassName())
+                    .append("(").append(el.getFileName()).append(":").append(el.getLineNumber()).append(")\n");
+            }
+
+            log = logBuilder.toString();
+        }
+
+        logger.log(log);
     }
 }

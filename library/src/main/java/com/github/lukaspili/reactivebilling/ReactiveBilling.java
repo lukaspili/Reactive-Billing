@@ -81,8 +81,8 @@ public class ReactiveBilling {
     }
 
     @NonNull
-    public Observable<GetSkuDetailsResponse> getSkuDetails(
-            @NonNull PurchaseType purchaseType, @NonNull String productId, String... moreProductIds) {
+    public Observable<GetSkuDetailsResponse> getSkuDetails(@NonNull PurchaseType purchaseType,
+                                                           @NonNull String productId, String... moreProductIds) {
         List<String> productIds = new ArrayList<>();
         productIds.add(productId);
         if (moreProductIds != null) {
@@ -125,7 +125,9 @@ public class ReactiveBilling {
         return purchaseFlowService;
     }
 
-    // Logging convenience methods
+    /**
+     * Logging convenience methods
+     */
     public static void log(Throwable t, String message, Object... args) {
         String log = String.format(message, args);
 

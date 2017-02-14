@@ -2,6 +2,7 @@ package com.github.lukaspili.reactivebilling.observable;
 
 import android.content.Context;
 
+import android.support.annotation.NonNull;
 import com.github.lukaspili.reactivebilling.BillingService;
 
 import rx.Observable;
@@ -9,7 +10,7 @@ import rx.Observer;
 
 public class BillingServiceObservable extends BaseObservable<BillingService> {
 
-    public static Observable<BillingService> create(Context context) {
+    @NonNull public static Observable<BillingService> create(@NonNull Context context) {
         return Observable.create(new BillingServiceObservable(context));
     }
 

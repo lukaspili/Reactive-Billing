@@ -3,6 +3,8 @@ package com.github.lukaspili.reactivebilling.observable;
 import android.content.Context;
 import android.os.RemoteException;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import com.github.lukaspili.reactivebilling.BillingService;
 import com.github.lukaspili.reactivebilling.model.PurchaseType;
 import com.github.lukaspili.reactivebilling.response.GetPurchasesResponse;
@@ -12,7 +14,8 @@ import rx.Observer;
 
 public class GetPurchasesObservable extends BaseObservable<GetPurchasesResponse> {
 
-    public static Observable<GetPurchasesResponse> create(Context context, PurchaseType purchaseType, String continuationToken) {
+    @NonNull public static Observable<GetPurchasesResponse> create(@NonNull Context context,
+        @NonNull PurchaseType purchaseType, @Nullable String continuationToken) {
         return Observable.create(new GetPurchasesObservable(context, purchaseType, continuationToken));
     }
 

@@ -16,6 +16,8 @@ package com.github.lukaspili.reactivebilling;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.github.lukaspili.reactivebilling.model.PurchaseType;
 import com.github.lukaspili.reactivebilling.observable.BillingServiceObservable;
@@ -28,6 +30,9 @@ import com.github.lukaspili.reactivebilling.response.PurchaseResponse;
 import com.github.lukaspili.reactivebilling.response.GetPurchasesResponse;
 import com.github.lukaspili.reactivebilling.response.GetSkuDetailsResponse;
 import com.github.lukaspili.reactivebilling.response.Response;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import rx.Observable;
 
@@ -69,28 +74,48 @@ public class ReactiveBilling {
         this.purchaseFlowService = purchaseFlowService;
     }
 
-    public Observable<BillingService> getBillingService() {
+    @NonNull public Observable<BillingService> getBillingService() {
         return BillingServiceObservable.create(context);
     }
 
-    public Observable<Response> isBillingSupported(PurchaseType purchaseType) {
+    @NonNull public Observable<Response> isBillingSupported(@NonNull PurchaseType purchaseType) {
         return IsBillingSupportedObservable.create(context, purchaseType);
     }
 
-    public Observable<Response> consumePurchase(String purchaseToken) {
+    @NonNull public Observable<Response> consumePurchase(@NonNull String purchaseToken) {
         return ConsumePurchaseObservable.create(context, purchaseToken);
     }
 
-    public Observable<GetSkuDetailsResponse> getSkuDetails(PurchaseType purchaseType, String... productIds) {
+    @NonNull public Observable<GetSkuDetailsResponse> getSkuDetails(
+        @NonNull PurchaseType purchaseType, @NonNull String productId, String... moreProductIds) {
+        List<String> productIds = new ArrayList<>();
+        productIds.add(productId);
+        if (moreProductIds != null) {
+            productIds.addAll(Arrays.asList(moreProductIds));
+        }
+        return getSkuDetails(purchaseType, productIds);
+    }
+
+    @NonNull public Observable<GetSkuDetailsResponse> getSkuDetails(
+        @NonNull PurchaseType purchaseType, @NonNull List<String> productIds) {
         return GetSkuDetailsObservable.create(context, purchaseType, productIds);
     }
 
-    public Observable<GetPurchasesResponse> getPurchases(PurchaseType purchaseType, String continuationToken) {
+    @NonNull public Observable<GetPurchasesResponse> getPurchases(
+        @NonNull PurchaseType purchaseType) {
+        return getPurchases(purchaseType, null);
+    }
+
+    @NonNull public Observable<GetPurchasesResponse> getPurchases(
+        @NonNull PurchaseType purchaseType, @Nullable String continuationToken) {
         return GetPurchasesObservable.create(context, purchaseType, continuationToken);
     }
 
-    public Observable<Response> startPurchase(String productId, PurchaseType purchaseType, String developerPayload, Bundle extras) {
-        return GetBuyIntentObservable.create(context, purchaseFlowService, productId, purchaseType, developerPayload, extras);
+    @NonNull public Observable<Response> startPurchase(@NonNull String productId,
+        @NonNull PurchaseType purchaseType, @Nullable String developerPayload,
+        @Nullable Bundle extras) {
+        return GetBuyIntentObservable.create(context, purchaseFlowService, productId, purchaseType,
+            developerPayload, extras);
     }
 
     public Observable<PurchaseResponse> purchaseFlow() {

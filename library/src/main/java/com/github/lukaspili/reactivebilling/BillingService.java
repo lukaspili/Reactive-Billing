@@ -67,12 +67,12 @@ public class BillingService {
         List<String> signatures = bundle.getStringArrayList("INAPP_DATA_SIGNATURE_LIST");
 
         List<GetPurchasesResponse.PurchaseResponse> purchaseResponses = new ArrayList<>();
-        for (int i = 0; i < productsIds.size(); i++) {
-            purchaseResponses.add(new GetPurchasesResponse.PurchaseResponse(
-                    productsIds.get(i),
-                    signatures.get(i),
-                    PurchaseParser.parse(purchases.get(i))
-            ));
+        if (productsIds != null && purchases != null && signatures != null) {
+            for (int i = 0; i < productsIds.size(); i++) {
+                purchaseResponses.add(
+                    new GetPurchasesResponse.PurchaseResponse(productsIds.get(i), signatures.get(i),
+                        PurchaseParser.parse(purchases.get(i))));
+            }
         }
 
         ReactiveBillingLogger.log("Get purchases - items size: %s", purchaseResponses.size());
@@ -87,7 +87,7 @@ public class BillingService {
         ReactiveBillingLogger.log("Get sku details - request: %s (thread %s)", TextUtils.join(", ", productIds), Thread.currentThread().getName());
 
         Bundle bundle = new Bundle();
-        bundle.putStringArrayList("ITEM_ID_LIST", new ArrayList(Arrays.asList(productIds)));
+        bundle.putStringArrayList("ITEM_ID_LIST", new ArrayList<>(productIds));
 
         bundle = billingService.getSkuDetails(BillingService.API_VERSION, context.getPackageName(), purchaseType.getIdentifier(), bundle);
 

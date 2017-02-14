@@ -8,7 +8,7 @@ import android.support.annotation.Nullable;
 
 import com.github.lukaspili.reactivebilling.BillingService;
 import com.github.lukaspili.reactivebilling.PurchaseFlowService;
-import com.github.lukaspili.reactivebilling.ReactiveBillingLogger;
+import com.github.lukaspili.reactivebilling.ReactiveBilling;
 import com.github.lukaspili.reactivebilling.model.PurchaseType;
 import com.github.lukaspili.reactivebilling.response.GetBuyIntentResponse;
 import com.github.lukaspili.reactivebilling.response.Response;
@@ -18,10 +18,13 @@ import rx.Observer;
 
 public class GetBuyIntentObservable extends BaseObservable<Response> {
 
-    @NonNull public static Observable<Response> create(@NonNull Context context,
-        @NonNull PurchaseFlowService purchaseFlowService, @NonNull String productId,
-        @NonNull PurchaseType purchaseType, @Nullable String developerPayload,
-        @Nullable Bundle extras) {
+    @NonNull
+    public static Observable<Response> create(@NonNull Context context,
+                                              @NonNull PurchaseFlowService purchaseFlowService,
+                                              @NonNull String productId,
+                                              @NonNull PurchaseType purchaseType,
+                                              @Nullable String developerPayload,
+                                              @Nullable Bundle extras) {
         return Observable.create(new GetBuyIntentObservable(context, purchaseFlowService, productId, purchaseType, developerPayload, extras));
     }
 
@@ -53,7 +56,7 @@ public class GetBuyIntentObservable extends BaseObservable<Response> {
             return;
         }
 
-        ReactiveBillingLogger.log("Will start purchase flow: %b (thread %s)", response.isSuccess(), Thread.currentThread().getName());
+        ReactiveBilling.log(null, "Will start purchase flow: %b (thread %s)", response.isSuccess(), Thread.currentThread().getName());
         if (response.isSuccess()) {
             purchaseFlowService.startFlow(response.getIntent(), extras);
         }

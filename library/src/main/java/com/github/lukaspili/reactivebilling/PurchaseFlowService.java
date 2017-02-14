@@ -28,7 +28,7 @@ public class PurchaseFlowService {
                 throw new IllegalStateException("Already has subscription");
             }
 
-            ReactiveBillingLogger.log("Purchase flow - subscribe (thread %s)", Thread.currentThread().getName());
+            ReactiveBilling.log(null, "Purchase flow - subscribe (thread %s)", Thread.currentThread().getName());
             hasSubscription = true;
         }
     }).doOnUnsubscribe(new Action0() {
@@ -38,7 +38,7 @@ public class PurchaseFlowService {
                 throw new IllegalStateException("Doesn't have any subscription");
             }
 
-            ReactiveBillingLogger.log("Purchase flow - unsubscribe (thread %s)", Thread.currentThread().getName());
+            ReactiveBilling.log(null, "Purchase flow - unsubscribe (thread %s)", Thread.currentThread().getName());
             hasSubscription = false;
         }
     });
@@ -58,7 +58,7 @@ public class PurchaseFlowService {
             throw new IllegalStateException("Cannot start flow without subscribers");
         }
 
-        ReactiveBillingLogger.log("Start flow (thread %s)", Thread.currentThread().getName());
+        ReactiveBilling.log(null, "Start flow (thread %s)", Thread.currentThread().getName());
 
         Intent intent = new Intent(context, ReactiveBillingShadowActivity.class);
         intent.putExtra("BUY_INTENT", buyIntent);
@@ -77,10 +77,10 @@ public class PurchaseFlowService {
         }
 
         if (resultCode == Activity.RESULT_OK) {
-            ReactiveBillingLogger.log("Purchase flow result - OK (thread %s)", Thread.currentThread().getName());
+            ReactiveBilling.log(null, "Purchase flow result - OK (thread %s)", Thread.currentThread().getName());
 
             int response = data.getIntExtra("RESPONSE_CODE", -1);
-            ReactiveBillingLogger.log("Purchase flow result - response: %d (thread %s)", response, Thread.currentThread().getName());
+            ReactiveBilling.log(null, "Purchase flow result - response: %d (thread %s)", response, Thread.currentThread().getName());
 
             if (response == 0) {
                 Purchase purchase = PurchaseParser.parse(data.getStringExtra("INAPP_PURCHASE_DATA"));
@@ -90,7 +90,7 @@ public class PurchaseFlowService {
                 subject.call(new PurchaseResponse(response, null, null, extras, false));
             }
         } else {
-            ReactiveBillingLogger.log("Purchase flow result - CANCELED (thread %s)", Thread.currentThread().getName());
+            ReactiveBilling.log(null, "Purchase flow result - CANCELED (thread %s)", Thread.currentThread().getName());
             subject.call(new PurchaseResponse(-1, null, null, extras, true));
         }
     }

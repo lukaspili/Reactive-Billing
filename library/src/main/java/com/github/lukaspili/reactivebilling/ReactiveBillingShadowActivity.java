@@ -30,7 +30,7 @@ public class ReactiveBillingShadowActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        ReactiveBillingLogger.log("Shadow activity - on create");
+        ReactiveBilling.log(null, "Shadow activity - on create");
 
         if (savedInstanceState == null) {
             handleIntent(getIntent());
@@ -39,7 +39,7 @@ public class ReactiveBillingShadowActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        ReactiveBillingLogger.log("Shadow activity - on destroy");
+        ReactiveBilling.log(null, "Shadow activity - on destroy");
         super.onDestroy();
     }
 
@@ -49,7 +49,7 @@ public class ReactiveBillingShadowActivity extends Activity {
     }
 
     private void handleIntent(Intent intent) {
-        ReactiveBillingLogger.log("Shadow activity - handle intent");
+        ReactiveBilling.log(null, "Shadow activity - handle intent");
 
         extras = intent.getBundleExtra("BUY_EXTRAS");
         PendingIntent buyIntent = intent.getParcelableExtra("BUY_INTENT");
@@ -57,7 +57,7 @@ public class ReactiveBillingShadowActivity extends Activity {
         try {
             startIntentSenderForResult(buyIntent.getIntentSender(), REQUEST_CODE, new Intent(), 0, 0, 0);
         } catch (IntentSender.SendIntentException e) {
-            ReactiveBillingLogger.log(e, "Shadow activity - cannot start buy intent");
+            ReactiveBilling.log(e, "Shadow activity - cannot start buy intent");
         }
     }
 
@@ -82,7 +82,7 @@ public class ReactiveBillingShadowActivity extends Activity {
             return; // can it happen?
         }
 
-        ReactiveBillingLogger.log("Shadow activity - on activity result");
+        ReactiveBilling.log(null, "Shadow activity - on activity result");
 
         ReactiveBilling.getInstance(this).getPurchaseFlowService().onActivityResult(resultCode, data, extras);
         finish();

@@ -38,11 +38,16 @@ public abstract class BaseObservable<T> implements Observable.OnSubscribe<T> {
         final Connection connection = new Connection(subscriber, useSemaphore);
 
         ReactiveBilling.log(null, "Bind service (thread %s)", Thread.currentThread().getName());
+        boolean bound = false;
         try {
-            context.bindService(intent, connection, Context.BIND_AUTO_CREATE);
+            bound = context.bindService(intent, connection, Context.BIND_AUTO_CREATE);
         } catch (SecurityException e) {
             ReactiveBilling.log(e, "Bind service error");
             subscriber.onError(e);
+        }
+
+        if(!bound){
+            subscriber.onError(new IlligalStateException("Service unable to bind"));
         }
 
         subscriber.add(Subscriptions.create(new Action0() {

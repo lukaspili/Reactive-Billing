@@ -81,7 +81,7 @@ public class BillingService {
         return new GetPurchasesResponse(response, purchaseResponses, bundle.getString("INAPP_CONTINUATION_TOKEN"));
     }
 
-    public GetSkuDetailsResponse getSkuDetails(PurchaseType purchaseType, List<String> productIds) throws RemoteException {
+    public GetSkuDetailsResponse getSkuDetails(PurchaseType purchaseType, List<String> productIds) throws RemoteException, JSONException {
         if (productIds == null || productIds.size() == 0) {
             throw new IllegalArgumentException("Product ids cannot be blank");
         }

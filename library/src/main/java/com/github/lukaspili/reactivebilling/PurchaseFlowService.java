@@ -86,7 +86,7 @@ public class PurchaseFlowService {
             ReactiveBilling.log(null, "Purchase flow result - response: %d (thread %s)", response, Thread.currentThread().getName());
 
             if (response == 0) {
-                Purchase purchase = null;
+                Purchase purchase;
                 try {
                     purchase = PurchaseParser.parse(data.getStringExtra("INAPP_PURCHASE_DATA"));
                 } catch (final JSONException e) {
@@ -97,6 +97,7 @@ public class PurchaseFlowService {
                             subscriber.onError(e);
                         }
                     }));
+                    return;
                 }
                 String signature = data.getStringExtra("INAPP_DATA_SIGNATURE");
                 subject.call(new PurchaseResponse(response, purchase, signature, extras, false));

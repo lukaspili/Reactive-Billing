@@ -4,8 +4,12 @@ import android.content.Context;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import com.github.lukaspili.reactivebilling.BillingService;
+import com.github.lukaspili.reactivebilling.ReactiveBilling;
 import com.github.lukaspili.reactivebilling.model.PurchaseType;
 import com.github.lukaspili.reactivebilling.response.GetSkuDetailsResponse;
+
+import org.json.JSONException;
+
 import java.util.List;
 import rx.Observable;
 import rx.Observer;
@@ -31,7 +35,10 @@ public class GetSkuDetailsObservable extends BaseObservable<GetSkuDetailsRespons
         try {
             observer.onNext(billingService.getSkuDetails(purchaseType, productIds));
             observer.onCompleted();
-        } catch (RemoteException e) {
+        } catch (RemoteException | JSONException e) {
+            if(e instanceof JSONException) {
+                ReactiveBilling.log(e, "Cannot parse purchase json");
+            }
             observer.onError(e);
         }
     }

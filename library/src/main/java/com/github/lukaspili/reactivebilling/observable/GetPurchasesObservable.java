@@ -9,6 +9,8 @@ import com.github.lukaspili.reactivebilling.BillingService;
 import com.github.lukaspili.reactivebilling.model.PurchaseType;
 import com.github.lukaspili.reactivebilling.response.GetPurchasesResponse;
 
+import org.json.JSONException;
+
 import rx.Observable;
 import rx.Observer;
 
@@ -33,7 +35,7 @@ public class GetPurchasesObservable extends BaseObservable<GetPurchasesResponse>
         try {
             observer.onNext(billingService.getPurchases(purchaseType, continuationToken));
             observer.onCompleted();
-        } catch (RemoteException e) {
+        } catch (RemoteException | JSONException e) {
             observer.onError(e);
         }
     }

@@ -10,17 +10,10 @@ import org.json.JSONObject;
  */
 public class PurchaseParser {
 
-    public static Purchase parse(String value) {
+    public static Purchase parse(String value) throws JSONException {
         ReactiveBilling.log(null, "purchase json: %s", value);
 
-        JSONObject json;
-        try {
-            json = new JSONObject(value);
-        } catch (JSONException e) {
-            ReactiveBilling.log(e, "Cannot parse purchase json");
-            return null;
-        }
-
+        JSONObject json = new JSONObject(value);
         return new Purchase(
                 json.optString("orderId"),
                 json.optString("packageName"),

@@ -10,13 +10,15 @@ import com.github.lukaspili.reactivebilling.model.Purchase;
 public class PurchaseResponse extends Response {
 
     private final Purchase purchase;
+    private final String purchaseData;
     private final String signature;
     private final Bundle extras;
     private final boolean isCancelled;
 
-    public PurchaseResponse(int responseCode, Purchase purchase, String signature, Bundle extras, boolean isCancelled) {
+    public PurchaseResponse(int responseCode, Purchase purchase, String purchaseData, String signature, Bundle extras, boolean isCancelled) {
         super(responseCode);
         this.purchase = purchase;
+        this.purchaseData = purchaseData;
         this.signature = signature;
         this.extras = extras;
         this.isCancelled = isCancelled;
@@ -29,6 +31,10 @@ public class PurchaseResponse extends Response {
 
     public Purchase getPurchase() {
         return purchase;
+    }
+
+    public String getPurchaseData() {
+        return purchaseData;
     }
 
     public String getSignature() {

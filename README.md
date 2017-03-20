@@ -313,6 +313,12 @@ You can find the Reactive Billing Example app on the play store:
 
 The source code is located in the current project, under `sample/`.
 
+## Proguard Rules
+
+```java
+-keep class com.github.lukaspili.reactivebilling.** { *;}
+```
+
 
 ## Gradle
 

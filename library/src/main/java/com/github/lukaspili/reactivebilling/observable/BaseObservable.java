@@ -49,6 +49,7 @@ public abstract class BaseObservable<T> implements Observable.OnSubscribe<T> {
         //service is not bound, throw exception
         if(!bound){
             subscriber.onError(new IllegalStateException("Service unable to bind"));
+            return;
         }
 
         subscriber.add(Subscriptions.create(new Action0() {

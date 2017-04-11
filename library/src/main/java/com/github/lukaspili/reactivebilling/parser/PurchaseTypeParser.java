@@ -1,5 +1,7 @@
 package com.github.lukaspili.reactivebilling.parser;
 
+import android.support.annotation.NonNull;
+
 import com.github.lukaspili.reactivebilling.model.PurchaseType;
 
 /**
@@ -7,7 +9,7 @@ import com.github.lukaspili.reactivebilling.model.PurchaseType;
  */
 public class PurchaseTypeParser {
 
-    public static PurchaseType parse(String value) {
+    public static PurchaseType parse(@NonNull String value) {
         switch (value) {
             case "inapp":
                 return PurchaseType.PRODUCT;

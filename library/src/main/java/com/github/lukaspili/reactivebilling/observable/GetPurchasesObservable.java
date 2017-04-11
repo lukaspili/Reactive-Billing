@@ -36,18 +36,12 @@ public class GetPurchasesObservable extends BaseObservable<GetPurchasesResponse>
         try {
             observer.onNext(billingService.getPurchases(purchaseType, continuationToken));
             observer.onCompleted();
-        } catch (RemoteException | JSONException e) {
-            if(e instanceof JSONException) {
-                ReactiveBilling.log(e, "Cannot parse purchase json");
-            }
+        } catch (JSONException e) {
+            ReactiveBilling.log(e, "Cannot parse purchase json");
+            observer.onError(e);
+        } catch (RemoteException e) {
+            ReactiveBilling.log(e, "Remote exception");
             observer.onError(e);
         }
     }
-
-//    @Override
-//    protected void onBillingServiceReady(IInAppBillingService billingService, Observer<? super IInAppBillingService> observer) {
-//        ReactiveBillingLogger.log("Billing service observable - service ready");
-//        observer.onNext(billingService);
-//        observer.onCompleted();
-//    }
 }

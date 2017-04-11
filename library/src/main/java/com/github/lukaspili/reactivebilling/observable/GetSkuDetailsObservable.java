@@ -35,10 +35,11 @@ public class GetSkuDetailsObservable extends BaseObservable<GetSkuDetailsRespons
         try {
             observer.onNext(billingService.getSkuDetails(purchaseType, productIds));
             observer.onCompleted();
-        } catch (RemoteException | JSONException e) {
-            if(e instanceof JSONException) {
-                ReactiveBilling.log(e, "Cannot parse purchase json");
-            }
+        } catch (JSONException e) {
+            ReactiveBilling.log(e, "Cannot parse purchase json");
+            observer.onError(e);
+        } catch (RemoteException e) {
+            ReactiveBilling.log(e, "Remote exception");
             observer.onError(e);
         }
     }

@@ -91,12 +91,7 @@ public class PurchaseFlowService {
                     purchase = PurchaseParser.parse(data.getStringExtra("INAPP_PURCHASE_DATA"));
                 } catch (final JSONException e) {
                     ReactiveBilling.log(e, "Cannot parse purchase json");
-                    observable.mergeWith(Observable.create(new Observable.OnSubscribe<PurchaseResponse>() {
-                        @Override
-                        public void call(Subscriber<? super PurchaseResponse> subscriber) {
-                            subscriber.onError(e);
-                        }
-                    }));
+                    observable.mergeWith(Observable.<PurchaseResponse>error(e));
                     return;
                 }
                 String signature = data.getStringExtra("INAPP_DATA_SIGNATURE");

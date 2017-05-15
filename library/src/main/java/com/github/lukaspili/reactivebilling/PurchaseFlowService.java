@@ -71,7 +71,7 @@ public class PurchaseFlowService {
         context.startActivity(intent);
     }
 
-    void onActivityResult(int resultCode, Intent data, Bundle extras) {
+    public void onActivityResult(int resultCode, Intent data, Bundle extras) {
         if (!hasSubscription) {
             throw new IllegalStateException("Subject cannot be null when receiving purchase result");
         }

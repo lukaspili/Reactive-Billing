@@ -32,4 +32,24 @@ public class PurchaseParser {
                 json.optBoolean("autoRenewing")
         );
     }
+
+    public static String toString(Purchase purchase) {
+        JSONObject json = new JSONObject();
+
+        try {
+            json.putOpt("orderId", purchase.getOrderId());
+            json.putOpt("packageName", purchase.getPackageName());
+            json.putOpt("productId", purchase.getProductId());
+            json.putOpt("developerPayload", purchase.getDeveloperPayload());
+            json.putOpt("purchaseToken", purchase.getPurchaseToken());
+            json.putOpt("purchaseState", purchase.getPurchaseState().getValue());
+            json.putOpt("purchaseTime", purchase.getPurchaseTime());
+            json.putOpt("autoRenewing", purchase.isAutoRenewing());
+        } catch (JSONException e) {
+            ReactiveBilling.log(e, "Cannot create json from the Purchase object");
+            return null;
+        }
+
+        return json.toString();
+    }
 }

@@ -68,6 +68,8 @@ public class GetBuyIntentObservable extends BaseObservable<Response> {
                         purchaseFlowService.onActivityResult(Activity.RESULT_OK, data, new Bundle());
                         observer.onNext(response);
                         observer.onCompleted();
+
+                        ReactiveBilling.log(null, "Product was restored, purchase flow will not start (thread %s)", response.isSuccess(), Thread.currentThread().getName());
                         return;
                     }
                 }

@@ -1,5 +1,7 @@
 package com.github.lukaspili.reactivebilling.parser;
 
+import android.support.annotation.NonNull;
+
 import com.github.lukaspili.reactivebilling.model.PurchaseType;
 
 /**
@@ -7,13 +9,14 @@ import com.github.lukaspili.reactivebilling.model.PurchaseType;
  */
 public class PurchaseTypeParser {
 
-    public static PurchaseType parse(String value) {
-        if (value.equals("inapp")) {
-            return PurchaseType.PRODUCT;
-        } else if (value.equals("subs")) {
-            return PurchaseType.SUBSCRIPTION;
-        } else {
-            throw new IllegalArgumentException("Unknown purchase type: " + value);
+    public static PurchaseType parse(@NonNull String value) {
+        switch (value) {
+            case "inapp":
+                return PurchaseType.PRODUCT;
+            case "subs":
+                return PurchaseType.SUBSCRIPTION;
+            default:
+                throw new IllegalArgumentException("Unknown purchase type: " + value);
         }
     }
 

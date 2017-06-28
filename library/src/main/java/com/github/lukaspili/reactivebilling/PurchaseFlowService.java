@@ -11,7 +11,10 @@ import com.github.lukaspili.reactivebilling.parser.PurchaseParser;
 import com.github.lukaspili.reactivebilling.response.PurchaseResponse;
 import com.jakewharton.rxrelay.PublishRelay;
 
+import org.json.JSONException;
+
 import rx.Observable;
+import rx.Subscriber;
 import rx.functions.Action0;
 
 /**
@@ -83,8 +86,14 @@ public class PurchaseFlowService {
             ReactiveBilling.log(null, "Purchase flow result - response: %d (thread %s)", response, Thread.currentThread().getName());
 
             if (response == 0) {
-                String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
-                Purchase purchase = PurchaseParser.parse(purchaseData);
+                Purchase purchase;
+                try {
+                    purchase = PurchaseParser.parse(data.getStringExtra("INAPP_PURCHASE_DATA"));
+                } catch (final JSONException e) {
+                    ReactiveBilling.log(e, "Cannot parse purchase json");
+                    observable.mergeWith(Observable.<PurchaseResponse>error(e));
+                    return;
+                }
                 String signature = data.getStringExtra("INAPP_DATA_SIGNATURE");
                 subject.call(new PurchaseResponse(response, purchase, purchaseData, signature, extras, false));
             } else {

@@ -6,8 +6,11 @@ import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.github.lukaspili.reactivebilling.BillingService;
+import com.github.lukaspili.reactivebilling.ReactiveBilling;
 import com.github.lukaspili.reactivebilling.model.PurchaseType;
 import com.github.lukaspili.reactivebilling.response.GetPurchasesResponse;
+
+import org.json.JSONException;
 
 import rx.Observable;
 import rx.Observer;
@@ -33,15 +36,12 @@ public class GetPurchasesObservable extends BaseObservable<GetPurchasesResponse>
         try {
             observer.onNext(billingService.getPurchases(purchaseType, continuationToken));
             observer.onCompleted();
+        } catch (JSONException e) {
+            ReactiveBilling.log(e, "Cannot parse purchase json");
+            observer.onError(e);
         } catch (RemoteException e) {
+            ReactiveBilling.log(e, "Remote exception");
             observer.onError(e);
         }
     }
-
-//    @Override
-//    protected void onBillingServiceReady(IInAppBillingService billingService, Observer<? super IInAppBillingService> observer) {
-//        ReactiveBillingLogger.log("Billing service observable - service ready");
-//        observer.onNext(billingService);
-//        observer.onCompleted();
-//    }
 }

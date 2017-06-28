@@ -16,6 +16,8 @@ import com.github.lukaspili.reactivebilling.response.GetPurchasesResponse;
 import com.github.lukaspili.reactivebilling.response.GetSkuDetailsResponse;
 import com.github.lukaspili.reactivebilling.response.Response;
 
+import org.json.JSONException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -51,7 +53,7 @@ public class BillingService {
         return new Response(response);
     }
 
-    public GetPurchasesResponse getPurchases(PurchaseType purchaseType, String continuationToken) throws RemoteException {
+    public GetPurchasesResponse getPurchases(PurchaseType purchaseType, String continuationToken) throws RemoteException, JSONException {
         ReactiveBilling.log(null, "Get purchases - request (thread %s)", Thread.currentThread().getName());
         Bundle bundle = billingService.getPurchases(BillingService.API_VERSION, context.getPackageName(), purchaseType.getIdentifier(), continuationToken);
 
@@ -79,7 +81,7 @@ public class BillingService {
         return new GetPurchasesResponse(response, purchaseResponses, bundle.getString("INAPP_CONTINUATION_TOKEN"));
     }
 
-    public GetSkuDetailsResponse getSkuDetails(PurchaseType purchaseType, List<String> productIds) throws RemoteException {
+    public GetSkuDetailsResponse getSkuDetails(PurchaseType purchaseType, List<String> productIds) throws RemoteException, JSONException {
         if (productIds == null || productIds.size() == 0) {
             throw new IllegalArgumentException("Product ids cannot be blank");
         }

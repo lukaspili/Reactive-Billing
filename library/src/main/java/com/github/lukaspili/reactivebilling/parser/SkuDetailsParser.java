@@ -10,13 +10,8 @@ import org.json.JSONObject;
  */
 public class SkuDetailsParser {
 
-    public static SkuDetails parse(String value) {
-        JSONObject json;
-        try {
-            json = new JSONObject(value);
-        } catch (JSONException e) {
-            return null;
-        }
+    public static SkuDetails parse(String value) throws JSONException {
+        JSONObject json = new JSONObject(value);
 
         return new SkuDetails(
                 json.optString("productId"),

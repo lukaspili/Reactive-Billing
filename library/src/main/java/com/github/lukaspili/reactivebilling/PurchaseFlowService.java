@@ -95,13 +95,13 @@ public class PurchaseFlowService {
                     return;
                 }
                 String signature = data.getStringExtra("INAPP_DATA_SIGNATURE");
-                subject.call(new PurchaseResponse(response, purchase, signature, extras, false));
+                subject.call(new PurchaseResponse(response, purchase, purchaseData, signature, extras, false));
             } else {
-                subject.call(new PurchaseResponse(response, null, null, extras, false));
+                subject.call(new PurchaseResponse(response, null, null, null, extras, false));
             }
         } else {
             ReactiveBilling.log(null, "Purchase flow result - CANCELED (thread %s)", Thread.currentThread().getName());
-            subject.call(new PurchaseResponse(-1, null, null, extras, true));
+            subject.call(new PurchaseResponse(-1, null, null, null, extras, true));
         }
     }
 }
